@@ -1,0 +1,5 @@
+# Change these at your peril:
+export PROJECT_NAME=Heat Pump Installer Chatbot Prototype
+export REPO_NAME=asf_hp_installer_chatbot
+export DESCRIPTION=A Whatsapp chatbot prototype powered by an LLM which assists heat pump installers with their queries on the job.
+export PROJECT_OPENNESS=public
