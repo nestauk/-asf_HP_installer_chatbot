@@ -163,9 +163,9 @@ def get_pinecone_vectorstore(
     Returns a Pinecone vector store for the specified index and embeddings.
 
     This function is used to create a vector store, which is a data structure that allows efficient storage and
-    retrieval of high-dimensional vectors. The vector store is created using a Pinecone index and OpenAI embeddings.
+    retrieval of high-dimensional vectors, as well as other capabilities such as querying and scaling. The vector store is created using a Pinecone index and OpenAI embeddings.
     The Pinecone index is a data structure provided by the Pinecone service that allows efficient storage and
-    retrieval of vectors in high-dimensional space. The OpenAI embeddings are used to convert text data into
+    retrieval of vectors in high-dimensional space. The OpenAI embeddings object can be used to convert text data into
     high-dimensional vectors that can be stored in the Pinecone index.
 
     Args:
