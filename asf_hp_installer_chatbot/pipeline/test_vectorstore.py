@@ -1,7 +1,7 @@
 """This is essentially a testing script to test out different retrieval methods in the pipeline and does not involve
 having to spin out the WhatsApp bot. It also quickly enables us to see the output of the retrieval methods and see if
-the database has the correct information.
-It will also enable us to evaluate the output in a quick way. It uses a lot of the functions from heat_pump_chatbot_post_embedding.py
+test if the database outputs are correct.
+It uses a lot of the functions from heat_pump_chatbot_post_embedding.py
 
 This script consists of:
 - Define the query to be used for the retrieval methods.
