@@ -16,8 +16,8 @@ from typing import List, Tuple
 
 
 # Fetch the API key from the environment variable
-api_key = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=api_key)
+# api_key = os.getenv("OPENAI_API_KEY")
+# client = OpenAI(api_key=api_key)
 
 
 class PDFProcessor:
@@ -29,8 +29,8 @@ class PDFProcessor:
         pdf_dir (str): Directory containing PDF files to process.
 
     Methods:
-        extract_text_from_pdfs: Extracts texts and filenames from PDFs in a specified directory.
-        chunk_text: Splits text into sentence chunks and tags each with metadata.
+        _extract_text_from_pdfs: Extracts texts and filenames from PDFs in a specified directory.
+        _chunk_text: Splits text into sentence chunks and tags each with metadata.
         process_pdfs: Processes PDFs to extract text, chunk it, and tag chunks with metadata.
         create_embeddings_alpha: Generates embeddings for text chunks, tagging them with metadata.
     """
@@ -42,9 +42,13 @@ class PDFProcessor:
         Args:
             pdf_dir (str): Directory containing PDF files to process.
         """
+        # Fetch the API key from the environment variable
+        api_key = os.getenv("OPENAI_API_KEY")
+        # Initialise the OpenAI client used for generating embeddings.
+        self.client = OpenAI(api_key=api_key)
         self.pdf_dir = pdf_dir
 
-    def extract_text_from_pdfs(self) -> Tuple[List[str], List[str]]:
+    def _extract_text_from_pdfs(self) -> Tuple[List[str], List[str]]:
         """
         Extracts and returns text from PDF files in a specified directory along with their filenames.
 
@@ -73,7 +77,7 @@ class PDFProcessor:
                 pdf_metadata_tags.append(pdf_file_name)
         return pdf_texts, pdf_metadata_tags
 
-    def chunk_text(self, text: str, metadata_tag: str) -> Tuple[List[str], List[str]]:
+    def _chunk_text(self, text: str, metadata_tag: str) -> Tuple[List[str], List[str]]:
         """
         Tokenizes text into sentences and associates each with a given metadata tag.
 
@@ -103,17 +107,21 @@ class PDFProcessor:
         Returns:
             tuple[list[str], list[str]]: A pair of lists containing all text chunks and their respective metadata tags.
         """
-        texts, metadata_tags = self.extract_text_from_pdfs()
+        texts, metadata_tags = self._extract_text_from_pdfs()
         chunked_texts = []
         chunked_metadata_tags = []
         for text, metadata_tag in zip(texts, metadata_tags):
-            chunks, chunk_tags = self.chunk_text(text, metadata_tag)
+            chunks, chunk_tags = self._chunk_text(text, metadata_tag)
             chunked_texts.extend(chunks)
             chunked_metadata_tags.extend(chunk_tags)
         return chunked_texts, chunked_metadata_tags
 
     def create_embeddings_alpha(
-        self, texts: List[str], chunk_tags: List[str], model_id: str, pdf_web_dict: dict
+        self,
+        text_chunks: List[str],
+        chunk_tags: List[str],
+        model_id: str,
+        pdf_web_dict: dict,
     ) -> Tuple[List, List[dict], List[str]]:
         """
         Generates embeddings for text chunks, associates each with metadata, and assigns unique identifiers.
@@ -123,7 +131,7 @@ class PDFProcessor:
         from a provided mapping. Generates unique identifiers for each embedding based on document and chunk sequence.
 
         Args:
-            texts (list[str]): The list of text chunks to embed.
+            text_chunks (list[str]): The list of text chunks to embed.
             chunk_tags (list[str]): Corresponding tags identifying the source PDF for each text chunk.
             model_id (str): Identifier for the embedding model to use.
             pdf_web_dict (dict): Mapping of PDF tags to additional source information.
@@ -136,30 +144,30 @@ class PDFProcessor:
         """
         embeddings = []
         metadata_list = []  # This will contain our metadata with chunk and source
-        document_counter = 1  # Starting with the first document
+        document_counter = 0  # Starting with the first document
         chunk_counter = 0  # Initialize chunk counter
         prev_tag = None  # Keep track of the previous tag
-        for text, tag in zip(texts, chunk_tags):
-            response = client.embeddings.create(
+        ids = []  # Initialise list to store unique identifiers
+        for text, tag in zip(text_chunks, chunk_tags):
+            response = self.client.embeddings.create(
                 input=text, model=model_id
             )  # Use your chosen model ID)
             embedding = response.data[0].embedding
             embeddings.append(embedding)
             # Increment document counter if the tag changes (indicating a new document)
             if tag != prev_tag:
-                document_counter += 1 if prev_tag is not None else 0
+                document_counter += 1
                 chunk_counter = 0  # Reset chunk counter for a new document
                 prev_tag = tag  # Update the previous tag
             # Create the metadata with chunk number and the PDF name from the tag
             metadata = {
                 "chunk": chunk_counter,
-                "pdf source": tag,
+                "pdf_source": tag,
                 "source": pdf_web_dict[tag],
                 "text": text,
             }
             metadata_list.append(metadata)
+            ids.append(f"{document_counter}-{chunk_counter}")
             # Increment the chunk counter
             chunk_counter += 1
-        # Create the ids based on the document and chunk counters
-        ids = [f"{document_counter}-{i}" for i in range(len(embeddings))]
         return embeddings, metadata_list, ids
