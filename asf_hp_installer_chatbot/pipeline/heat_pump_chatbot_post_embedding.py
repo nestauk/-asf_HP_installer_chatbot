@@ -41,6 +41,8 @@ from flask import Flask, request
 from twilio.twiml.messaging_response import MessagingResponse
 import csv
 import hashlib
+import yaml
+from typing import Any, Callable
 from asf_hp_installer_chatbot import PROJECT_DIR
 
 # Set the OpenAI API key and Pinecone environment
@@ -49,30 +51,20 @@ PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_ENVIRONMENT = os.getenv("gcp-starter") or "gcp-starter"
 
 # Model parameters, input file and chatbot prompt
-index_name = "chatbot-onboarding"
-model_name = "text-embedding-ada-002"
-output_file = "/outputs/embedding/vector_embeddings_nibe_f2040_231844-5.pkl"
-chatbot_prompt = """
-[Chatbot Name]: Heat Pump Companion
-[Objective]: To provide friendly, accurate, and helpful information on heat pump installation, maintenance, and troubleshooting to a professional heat pump installer.
-[Tone]: Conversational and positive, with a focus on being helpful and reassuring to the user.
-[Knowledge Base]: The NIBE 2040 installer manual.
-[RAG Model Instructions]:
-1. [Retrieve]: When a user query is received, first identify key terms related to heat pumps (e.g., installation, types, efficiency, troubleshooting) and use them to retrieve the most relevant documents from the knowledge base.
-2. [Generate]: Based on the information retrieved, generate a response that is tailored to the user's query. Ensure the response is easy to understand, avoids technical jargon unless necessary, and provides actionable advice or clear information.
-3. [Tone Adjustment]: Apply a conversational tone to the generated response, aiming to mimic a friendly expert providing advice. Use phrases that reassure the user, such as "Great question!", "Here's what you need to know,", or "I'm here to help with your heat pump questions."
-4. [Contextual Relevance]: Ensure the response is directly relevant to the user's query, providing specific information about heat pumps as requested. If the query is about installation, focus on providing guidance about selecting the right heat pump from your [Knowledge Base], installation process, and tips for ensuring efficient operation.
-[User Interaction Examples]:
-- [User Query]: "What's the best heat pump for a small home?"
-- [RAG Response]: "Great question! For a small home, you'll want a heat pump that's efficient and sized appropriately to save on energy costs while keeping your space comfortable. A ductless mini-split system is often a good choice. They're versatile and can be more energy-efficient for smaller spaces."
-- [User Query]: "How often do I need to service my heat pump?"
-- [RAG Response]: "Regular maintenance is key to keeping your heat pump running smoothly. It's recommended to have it serviced at least once a year by a professional. This helps ensure efficiency and prolongs the life of your system."
-"""
+with open(f"{PROJECT_DIR}/asf_hp_installer_chatbot/config/config.yaml", "r") as file:
+    config = yaml.safe_load(file)
+index_name = config["index_name"]
+model_name = config["model_id"]
+output_file = config["most_recent_embedding"]
+chatbot_prompt = config["chatbot_prompt"]
+gpt_model = config["gpt_model"]
+temperature = config["temp"]
+output_Q_and_A = config["Q_and_A_file"]
 
 
 # Read in CSV file with vector embeddings and metadata
 def get_vector_embeddings_df(
-    output_file: str = "/outputs/embedding/vector_embeddings_nibe_f2040_231844-5.pkl",
+    output_file: str,
 ) -> pd.DataFrame:
     """
     Loads and returns a DataFrame of vector embeddings from a pickle file.
@@ -84,26 +76,25 @@ def get_vector_embeddings_df(
     Returns:
         pd.DataFrame: A DataFrame containing vector embeddings.
     """
-    return pd.read_pickle(f"{PROJECT_DIR}{output_file}")
+    if output_file is None:
+        output_file = config["output_file"]
+    return pd.read_pickle(os.path.join(PROJECT_DIR, output_file))
 
 
-def init_pinecone(
-    pinecone_api_key: str = PINECONE_API_KEY,
-    pinecone_environment: str = PINECONE_ENVIRONMENT,
-):
+def init_pinecone():
     """
     Initialises Pinecone using the provided API key and environment.
-    This function is used to initialises the Pinecone service, which is a vector database service that allows efficient
+    This function is used to initialise the Pinecone service, which is a vector database service that allows efficient
     storage and retrieval of high-dimensional vectors.
     Note:
         Depends on the `PINECONE_API_KEY` and `PINECONE_ENVIRONMENT` variables.
     """
-    pinecone.init(api_key=pinecone_api_key, environment=pinecone_environment)
+    pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENVIRONMENT)
 
 
 def create_and_initialize_index(index_name: str) -> pinecone.GRPCIndex:
     """
-    Creates and initializes a Pinecone index with the specified name.
+    Creates and initialises a Pinecone index with the specified name.
 
     The Pinecone index is a data structure provided by the Pinecone service that allows efficient storage and retrieval
     of vectors in high-dimensional space. It is used in this function to store the vector embeddings for later retrieval.
@@ -182,11 +173,12 @@ def get_chat_openai(model: str = "gpt-3.5-turbo", temp: float = 0.5) -> ChatOpen
     """
     Creates and returns a ChatOpenAI object configured for interacting with OpenAI's Chat API.
 
-    This function configures a ChatOpenAI instance with a specific API key, model name, and temperature setting.
-    The API key is required for authentication with OpenAI's services. The model name determines which version
-    of GPT (Generative Pre-trained Transformer) will be used for generating responses.
-    The temperature parameter controls the randomness of the output, with lower values producing more deterministic
-    and predictable text, and higher values resulting in more varied and creative responses.
+    Args:
+        model (str, optional): The model name determines which version of GPT (Generative Pre-trained Transformer)
+                               will be used for generating responses.
+        temp (float, optional): The temperature parameter controls the randomness of the output, with lower values
+                                producing more deterministic and predictable text, and higher values resulting in
+                                more varied and creative responses. Suggested range is between 0 and 1.
 
 
     Returns:
@@ -250,6 +242,8 @@ def append_to_csv(
         answer (str): The chatbot's response.
         timestamp (str): The timestamp of the message.
     """
+    # Ensure the directory exists
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
     file_exists = os.path.isfile(filename)
     with open(filename, "a", newline="") as f:
         writer = csv.writer(f)
@@ -258,45 +252,72 @@ def append_to_csv(
         writer.writerow([sender_hash, incoming_msg, answer, timestamp])
 
 
-def bot():
+def create_bot(
+    gpt_model: str, temperature: float, vectorstore: Any, chatbot_prompt: str
+) -> Callable:
     """
-    Handles incoming messages, generates responses, and appends the data to a CSV file.
+    Factory function that creates a Flask route function (bot) for handling incoming messages,
+    generating responses, and appending the data to a CSV file.
+
+    Args:
+        gpt_model (str): The model name determines which version of GPT (Generative Pre-trained Transformer)
+                         will be used for generating responses.
+        temperature (float): The temperature parameter controls the randomness of the output, with lower values
+                             producing more deterministic and predictable text, and higher values resulting in
+                             more varied and creative responses.
+        vectorstore (Any): The storage for vector representations of the knowledge base.
+        chatbot_prompt (str): The chatbot's prompt that will be used as a part of the input to the model.
 
     Returns:
-        str: The chatbot's response.
+        Callable: A Flask route function (bot) that handles incoming messages, generates responses,
+                  and appends the data to a CSV file. The bot function uses the request object from Flask
+                  to get the incoming message and sender's number from the HTTP request, and returns the
+                  chatbot's response in TwiML format, which can be returned as a response to a Twilio webhook.
     """
-    incoming_msg = request.values.get("Body", "").lower()
-    sender_number = request.values.get("From", "")
-    # Generate a SHA256 hash of the sender number
-    sender_hash = get_sender_hash(sender_number)
-    sender_hash = hashlib.sha256(sender_number.encode()).hexdigest()
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    resp = MessagingResponse()
-    msg = resp.message()
-    llm = get_chat_openai()
-    qa = get_retrieval_qa(llm, vectorstore)
-    response = qa.run(chatbot_prompt + " " + incoming_msg)
-    answer = response
-    msg.body(response)
-    # Append the data to a CSV file
-    append_to_csv(
-        f"{PROJECT_DIR}/outputs/data/incoming_messages.csv",
-        sender_hash,
-        incoming_msg,
-        answer,
-        timestamp,
-    )
-    return str(resp)
+
+    def bot():
+        incoming_msg = request.values.get("Body", "").lower()
+        sender_number = request.values.get("From", "")
+        # Generate a SHA256 hash of the sender number
+        sender_hash = get_sender_hash(sender_number)
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        # Create a new instance of the MessagingResponse class. This will be used to generate the TwiML response.
+        resp = MessagingResponse()
+        # Create a new <Message> element that will be added to the MessagingResponse. This will contain the chatbot's response.
+        msg = resp.message()
+        # Call the get_chat_openai function to get a language model from OpenAI. The gpt_model and temperature parameters are used to configure the model.
+        llm = get_chat_openai(gpt_model, temperature)
+        # Call the get_retrieval_qa function to create a QA system. The llm and vectorstore parameters are used to configure the system.
+        qa = get_retrieval_qa(llm, vectorstore)
+        # Generate a response to the incoming message. The chatbot_prompt and incoming_msg are concatenated and passed to the run method of the QA system.
+        response = qa.run(chatbot_prompt + " " + incoming_msg)
+        # Assign the generated response to the answer variable. This seems redundant in this context, unless answer is used elsewhere in the code.
+        answer = response
+        # Set the body of the <Message> element to the generated response. This is the message that will be sent back to the user.
+        msg.body(response)
+        # Append the data to a CSV file
+        append_to_csv(
+            f"{PROJECT_DIR}/{output_Q_and_A}",
+            sender_hash,
+            incoming_msg,
+            answer,
+            timestamp,
+        )
+        return str(resp)
+
+    return bot
 
 
 if __name__ == "__main__":
-    vector_embeddings_df = get_vector_embeddings_df()
+    vector_embeddings_df = get_vector_embeddings_df(output_file)
     init_pinecone()
     index = create_and_initialize_index(index_name)
     upsert_data_to_index(index, vector_embeddings_df)
     embed = get_openai_embeddings(model_name)
-    index = pinecone.Index(index_name)
-    vectorstore = get_pinecone_vectorstore(index, embed)
+    # switch back to normal index for langchain
+    langchain_index = pinecone.Index(index_name)
+    vectorstore = get_pinecone_vectorstore(langchain_index, embed)
     app = Flask(__name__)
-    app.route("/bot", methods=["POST"])(bot)
+    bot_with_args = create_bot(gpt_model, temperature, vectorstore, chatbot_prompt)
+    app.route("/bot", methods=["POST"])(bot_with_args)
     app.run(port=4000)

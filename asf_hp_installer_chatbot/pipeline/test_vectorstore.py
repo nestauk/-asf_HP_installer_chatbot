@@ -29,9 +29,12 @@ from asf_hp_installer_chatbot.pipeline.heat_pump_chatbot_post_embedding import (
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.vectorstores import Pinecone
 from langchain.chat_models import ChatOpenAI
+from pinecone import SearchResults
 import logging
 
-logging.basicConfig(level=logging.INFO)
+# Setup logger
+script_name = os.path.basename(__file__)
+logger = logging.getLogger(script_name)
 
 # Set the OpenAI API key and Pinecone environment
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -73,7 +76,8 @@ def perform_similarity_search(vectorstore: Pinecone, query: str, k: int = 3):
         k (int, optional): The number of most relevant documents to return. Defaults to 3.
 
     Returns:
-        The result of the similarity search.
+    SearchResults: The result of the similarity search, containing the IDs and similarity scores
+                    of the top k most similar vectors to the query vector.
     """
     return vectorstore.similarity_search(
         query, k=k  # our search query  # return k most relevant docs
@@ -106,20 +110,18 @@ if __name__ == "__main__":
     upsert_data_to_index(index, vector_embeddings_df)
     embed = get_openai_embeddings(model_name)
     index = pinecone.Index(index_name)
-    text_field = "text"
     vectorstore = get_pinecone_vectorstore(index, embed)
     sim_search_output = perform_similarity_search(vectorstore, query)
-    logging.info("Similarity search output:")
-    logging.info(sim_search_output)
-    print(sim_search_output)
+    logger.info("Similarity search output:")
+    logger.info(sim_search_output)
     llm = get_chat_openai()
     qa = get_retrieval_qa(llm, vectorstore)
     response = qa.run(query)
-    logging.info("Chatbot response without sources")
-    logging.info(response)
+    logger.info("Chatbot response without sources")
+    logger.info(response)
     qa_with_sources = create_retrieval_qa_with_sources(llm, "stuff", vectorstore)
     response_source = qa_with_sources(query)
-    logging.info("Chatbot response with sources:")
-    logging.info(response_source["answer"])
-    logging.info("Sources:")
-    logging.info(response_source["sources"])
+    logger.info("Chatbot response with sources:")
+    logger.info(response_source["answer"])
+    logger.info("Sources:")
+    logger.info(response_source["sources"])
