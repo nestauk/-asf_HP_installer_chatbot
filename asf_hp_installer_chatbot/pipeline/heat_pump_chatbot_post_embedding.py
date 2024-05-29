@@ -44,40 +44,28 @@ import hashlib
 import yaml
 from typing import Any, Callable
 from asf_hp_installer_chatbot import PROJECT_DIR
+from asf_hp_installer_chatbot import config
 
 # Set the OpenAI API key and Pinecone environment
 openai.api_key = os.getenv("OPENAI_API_KEY")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
 PINECONE_ENVIRONMENT = os.getenv("gcp-starter") or "gcp-starter"
 
-# Model parameters, input file and chatbot prompt
-with open(f"{PROJECT_DIR}/asf_hp_installer_chatbot/config/config.yaml", "r") as file:
-    config = yaml.safe_load(file)
-index_name = config["index_name"]
-model_name = config["model_id"]
-output_file = config["most_recent_embedding"]
-chatbot_prompt = config["chatbot_prompt"]
-gpt_model = config["gpt_model"]
-temperature = config["temp"]
-output_Q_and_A = config["Q_and_A_file"]
-
 
 # Read in CSV file with vector embeddings and metadata
 def get_vector_embeddings_df(
-    output_file: str,
+    output_file: str = config["most_recent_embedding"],
 ) -> pd.DataFrame:
     """
     Loads and returns a DataFrame of vector embeddings from a pickle file.
 
     Args:
-        output_file (str, optional): The path to the pickle file relative to the project directory.
-        Defaults to '/outputs/embedding/vector_embeddings_nibe_f2040_231844-5.pkl'.
+        output_file (str): The path to the pickle file relative to the project directory.
+        Defaults to the most recent embedding.
 
     Returns:
         pd.DataFrame: A DataFrame containing vector embeddings.
     """
-    if output_file is None:
-        output_file = config["output_file"]
     return pd.read_pickle(os.path.join(PROJECT_DIR, output_file))
 
 
@@ -92,7 +80,9 @@ def init_pinecone():
     pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENVIRONMENT)
 
 
-def create_and_initialize_index(index_name: str) -> pinecone.GRPCIndex:
+def create_and_initialize_index(
+    index_name: str = config["index_name"],
+) -> pinecone.GRPCIndex:
     """
     Creates and initialises a Pinecone index with the specified name.
 
@@ -101,7 +91,6 @@ def create_and_initialize_index(index_name: str) -> pinecone.GRPCIndex:
 
     Args:
         index_name (str): The name of the index to create.
-
     Returns:
         pinecone.GRPCIndex: The created Pinecone index.
     """
@@ -128,17 +117,15 @@ def upsert_data_to_index(index: pinecone.GRPCIndex, vector_embeddings_df: pd.Dat
     index.upsert_from_dataframe(vector_embeddings_df, batch_size=100)
 
 
-def get_openai_embeddings(model_name: str) -> OpenAIEmbeddings:
+def get_openai_embeddings(model_name: str = config["model_id"]) -> OpenAIEmbeddings:
     """
     Returns an OpenAIEmbeddings object for the specified model.
 
     This function is used to create an OpenAIEmbeddings object, which is a wrapper around the OpenAI API that
     provides functionality for generating embeddings from text data. Embeddings are high-dimensional vector
     representations of text that capture semantic meaning.
-
     Args:
-        model_name (str): The name of the model to use for generating embeddings. This should be the name of a
-        pre-trained model provided by the OpenAI API.
+        model_name (str): The name of the model to use for generating embeddings. This should be the name of a pre-trained model provided by the OpenAI
 
     Returns:
         OpenAIEmbeddings: An OpenAIEmbeddings object that can be used to generate embeddings from text data. The
@@ -169,7 +156,9 @@ def get_pinecone_vectorstore(
     return Pinecone(index, embed.embed_query, "text")
 
 
-def get_chat_openai(model: str = "gpt-3.5-turbo", temp: float = 0.5) -> ChatOpenAI:
+def get_chat_openai(
+    model: str = config["gpt_model"], temp: float = config["temp"]
+) -> ChatOpenAI:
     """
     Creates and returns a ChatOpenAI object configured for interacting with OpenAI's Chat API.
 
@@ -253,20 +242,18 @@ def append_to_csv(
 
 
 def create_bot(
-    gpt_model: str, temperature: float, vectorstore: Any, chatbot_prompt: str
+    vectorstore: Any,
+    chatbot_prompt: str = config["chatbot_prompt"],
+    output_Q_and_A: str = config["Q_and_A_file"],
 ) -> Callable:
     """
     Factory function that creates a Flask route function (bot) for handling incoming messages,
     generating responses, and appending the data to a CSV file.
 
     Args:
-        gpt_model (str): The model name determines which version of GPT (Generative Pre-trained Transformer)
-                         will be used for generating responses.
-        temperature (float): The temperature parameter controls the randomness of the output, with lower values
-                             producing more deterministic and predictable text, and higher values resulting in
-                             more varied and creative responses.
         vectorstore (Any): The storage for vector representations of the knowledge base.
         chatbot_prompt (str): The chatbot's prompt that will be used as a part of the input to the model.
+        output_Q_and_A (str): The path to the CSV file where the Q&A data will be stored.
 
     Returns:
         Callable: A Flask route function (bot) that handles incoming messages, generates responses,
@@ -286,7 +273,7 @@ def create_bot(
         # Create a new <Message> element that will be added to the MessagingResponse. This will contain the chatbot's response.
         msg = resp.message()
         # Call the get_chat_openai function to get a language model from OpenAI. The gpt_model and temperature parameters are used to configure the model.
-        llm = get_chat_openai(gpt_model, temperature)
+        llm = get_chat_openai()
         # Call the get_retrieval_qa function to create a QA system. The llm and vectorstore parameters are used to configure the system.
         qa = get_retrieval_qa(llm, vectorstore)
         # Generate a response to the incoming message. The chatbot_prompt and incoming_msg are concatenated and passed to the run method of the QA system.
@@ -309,15 +296,16 @@ def create_bot(
 
 
 if __name__ == "__main__":
-    vector_embeddings_df = get_vector_embeddings_df(output_file)
+    vector_embeddings_df = get_vector_embeddings_df()
     init_pinecone()
-    index = create_and_initialize_index(index_name)
+    index = create_and_initialize_index()
     upsert_data_to_index(index, vector_embeddings_df)
-    embed = get_openai_embeddings(model_name)
+    embed = get_openai_embeddings()
     # switch back to normal index for langchain
+    index_name = config["index_name"]
     langchain_index = pinecone.Index(index_name)
     vectorstore = get_pinecone_vectorstore(langchain_index, embed)
     app = Flask(__name__)
-    bot_with_args = create_bot(gpt_model, temperature, vectorstore, chatbot_prompt)
+    bot_with_args = create_bot(vectorstore)
     app.route("/bot", methods=["POST"])(bot_with_args)
     app.run(port=4000)
