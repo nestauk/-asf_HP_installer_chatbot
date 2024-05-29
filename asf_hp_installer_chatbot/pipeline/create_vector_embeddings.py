@@ -41,7 +41,7 @@ def update_metadata_file(metadata: Dict, metadata_file: str):
 
     Note:
         If the metadata file does not exist or does not contain valid JSON, an empty dictionary
-        will be used as the existing data.
+        will be used as the existing data and a warning will be logged.
     """
     # Try to load existing data
     try:
