@@ -51,7 +51,7 @@ chatbot_prompt: '"[Chatbot Name]: Heat Pump Companion
 gpt_model: gpt-3.5-turbo
 index_name: chatbot-onboarding
 model_id: text-embedding-ada-002
-most_recent_embedding: outputs/embedding/vector_embeddings_55412b5ba9e3b26b64ee_20240529_133104.pkl
+most_recent_embedding: outputs/embedding/vector_embeddings_55412b5ba9e3b26b64ee_20240529_133729.pkl
 pdf_dir: inputs/data/air2water_HP_installation_guides/database_pdf/
 pdf_to_web_dict:
   Nibe_F2040_231844-5.pdf: https://www.nibe.eu/assets/documents/16900/231844-5.pdf
