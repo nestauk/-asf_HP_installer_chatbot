@@ -13,12 +13,14 @@ To run this script, execute the following command:
 
 """
 
+import logging
 from pdf_processor import PDFProcessor
 import os
 import yaml
 import openai
 import pandas as pd
 from asf_hp_installer_chatbot import PROJECT_DIR
+from asf_hp_installer_chatbot import config
 from datetime import datetime
 import hashlib
 import json
@@ -37,15 +39,18 @@ def update_metadata_file(metadata: Dict, metadata_file: str):
             the keys are timestamps and the values are lists of PDF names.
         metadata_file (str): The path to the metadata file.
 
-    Raises:
-        FileNotFoundError: If the metadata file does not exist.
-        json.JSONDecodeError: If the metadata file does not contain valid JSON.
+    Note:
+        If the metadata file does not exist or does not contain valid JSON, an empty dictionary
+        will be used as the existing data.
     """
     # Try to load existing data
     try:
         with open(metadata_file, "r") as f:
             existing_data = json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
+        logging.warning(
+            """Metadata file not found or invalid JSON. Creating new metadata file."""
+        )
         existing_data = {}
 
     # Add the new data
@@ -98,14 +103,9 @@ if __name__ == "__main__":
     # Fetch the API key from the environment variable
     openai.api_key = os.getenv("OPENAI_API_KEY")
 
-    with open(
-        f"{PROJECT_DIR}/asf_hp_installer_chatbot/config/config.yaml", "r"
-    ) as file:
-        config = yaml.safe_load(file)
-
     # Define the directory containing the installation pdfs
-    pdf_dir = f"{PROJECT_DIR}{config['pdf_dir']}"
-
+    pdf_dir = os.path.join(PROJECT_DIR, config["pdf_dir"])
+    print(pdf_dir)
     # Initialise PDFProcessor and process PDFs
     pdf_processor = PDFProcessor(pdf_dir)
     chunked_texts, chunked_metadata_tags = pdf_processor.process_pdfs()
@@ -139,10 +139,8 @@ if __name__ == "__main__":
     base_output_file = (
         f"outputs/embedding/vector_embeddings_{hash_hex_short}_{timestamp}.pkl"
     )
-    output_file = f"{PROJECT_DIR}/{base_output_file}"
+    output_file = os.path.join(PROJECT_DIR, base_output_file)
     vector_embeddings_df.to_pickle(output_file)
     config["most_recent_embedding"] = base_output_file
-    with open(
-        f"{PROJECT_DIR}/asf_hp_installer_chatbot/config/config.yaml", "w"
-    ) as file:
+    with open(f"{PROJECT_DIR}/asf_hp_installer_chatbot/config/base.yaml", "w") as file:
         yaml.dump(config, file)

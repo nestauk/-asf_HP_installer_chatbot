@@ -15,11 +15,6 @@ import os
 from typing import List, Tuple
 
 
-# Fetch the API key from the environment variable
-# api_key = os.getenv("OPENAI_API_KEY")
-# client = OpenAI(api_key=api_key)
-
-
 class PDFProcessor:
     """
     Provides functionality for processing PDF files, including text extraction, text chunking,
