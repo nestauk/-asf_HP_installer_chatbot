@@ -1,5 +1,9 @@
 from langchain.schema import SystemMessage
-from langchain.prompts import HumanMessagePromptTemplate, ChatPromptTemplate
+from langchain.prompts import (
+    HumanMessagePromptTemplate,
+    ChatPromptTemplate,
+    MessagesPlaceholder,
+)
 
 optional_preprompt = """
 You are a helpful assistant, assisting a professional heat pump installer with their queries related to heat pump installation, maintenance, and troubleshooting.
@@ -35,4 +39,12 @@ human_prompt = HumanMessagePromptTemplate.from_template(
 
 chatbot_template = ChatPromptTemplate.from_messages(
     [chatbot_system_message, human_prompt]
+)
+
+chatbot_with_history_template = ChatPromptTemplate.from_messages(
+    [
+        chatbot_system_message,
+        MessagesPlaceholder(variable_name="history"),
+        human_prompt,
+    ]
 )
