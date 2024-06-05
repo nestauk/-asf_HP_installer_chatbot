@@ -9,6 +9,8 @@ from app.utils.events import lifespan
 from rag import hp_installer_bot_chain
 from rag.utils.callbacks import langfuse_handler_from_config
 
+from app.client import chat
+
 
 app = FastAPI(lifespan=lifespan)
 
@@ -31,6 +33,8 @@ langfuse_handler = langfuse_handler_from_config(
     release="0.1.0",
     tags=["dev", "api", "v1"],
 )  # TODO move to env vars
+
+app.add_route("/hook", chat, methods=["POST"])
 
 chatbot_chain = hp_installer_bot_chain.with_config(
     RunnableConfig(callbacks=[langfuse_handler])
