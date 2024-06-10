@@ -105,7 +105,6 @@ if __name__ == "__main__":
 
     # Define the directory containing the installation pdfs
     pdf_dir = os.path.join(PROJECT_DIR, config["pdf_dir"])
-    print(pdf_dir)
     # Initialise PDFProcessor and process PDFs
     pdf_processor = PDFProcessor(pdf_dir)
     chunked_texts, chunked_metadata_tags = pdf_processor.process_pdfs()
