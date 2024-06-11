@@ -29,7 +29,6 @@ from asf_hp_installer_chatbot.pipeline.heat_pump_chatbot_post_embedding import (
 from langchain.chains import RetrievalQAWithSourcesChain
 from langchain.vectorstores import Pinecone
 from langchain.chat_models import ChatOpenAI
-from pinecone import SearchResults
 import logging
 
 # Setup logger
@@ -43,7 +42,7 @@ PINECONE_ENVIRONMENT = os.getenv("gcp-starter") or "gcp-starter"
 # Model parameters, input file and chatbot prompt
 index_name = "chatbot-onboarding"
 model_name = "text-embedding-ada-002"
-output_file = "/outputs/embedding/vector_embeddings_nibe_f2040_231844-5.pkl"
+output_file = "outputs/embedding/vector_embeddings_nibe_f2040_231844-5.pkl"
 chatbot_prompt = """
 [Chatbot Name]: Heat Pump Companion
 [Objective]: To provide friendly, accurate, and helpful information on heat pump installation, maintenance, and troubleshooting to a professional heat pump installer.
@@ -105,7 +104,7 @@ def create_retrieval_qa_with_sources(
 
 if __name__ == "__main__":
     vector_embeddings_df = get_vector_embeddings_df(output_file)
-    init_pinecone(PINECONE_API_KEY, PINECONE_ENVIRONMENT)
+    init_pinecone()
     index = create_and_initialize_index(index_name)
     upsert_data_to_index(index, vector_embeddings_df)
     embed = get_openai_embeddings(model_name)
