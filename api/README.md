@@ -76,6 +76,45 @@ langchain serve
 
 This project folder includes a Dockerfile that allows you to easily build and host your LangServe app.
 
+## Deployment (Local testing)
+
+docker-compose configs are also included. This allows deployment of the vector database and API as a single service, and makes use of a `.env` at the root of the repo. See `.env.template` for template example of required environment variables.
+
+For the first time running run the following command to build and deploy locally.
+
+```shell
+docker compose up --build
+```
+
+Add `-d` to launch in daemon (background) mode.
+
+To stop the service, find the container group in Docker dashboard and stop it there. You can also run the below command:
+
+```shell
+docker compose stop
+```
+
+To tear down the service:
+
+```shell
+docker compose down
+```
+
+## Deployment (Cloud/Prod)
+
+1. Login to a cloud container registry (i.e. Elastic Container Registry)
+
+2. Tag the container with the URL corresponding to the cloud registry
+
+   - Examples: `docker.registry.url/image_name:tag` or `docker.registry.url/asf-hpi-chatbot:api-latest-prod`
+   - Note that the part after colon is a version related tag
+
+3. In the cloud instance, install dependencies, login to cloud container registry, and pull the container an example image url `docker.registry.url/asf-hpi-chatbot:api-latest-prod`
+
+4. Setup reverse proxies (Caddy or Nginx)/ Route53, as well as other network config that is relevant
+
+5. Add the relevant `.env` details, copy contents of `docker-compose-prod.yml` to the same folder, and run `docker compose -f docker-compose-prod.yml --build` or without the `--build` argument. Similar to the local testing deployment, but pointing directly to the production docker compose config file.
+
 ### Building the Image
 
 To build the image, you simply:
