@@ -6,7 +6,7 @@ from langchain_community.document_loaders.pdf import (
 )
 
 from pathlib import Path
-from typing import Union, Any, List
+from typing import Tuple, Union, Any, List
 
 
 class CustomPDFLoader(BasePDFLoader):
@@ -23,13 +23,24 @@ class CustomPDFLoader(BasePDFLoader):
         self.mode = mode
         self.unstructured_kwargs = unstructured_kwargs
 
-    def _get_metadata(self) -> dict:
-        """Return metadata for the PDF source.
+    def _get_source(self) -> str:
+        """Return web source metadata for the PDF source.
 
         Returns:
-            dict: Metadata for the PDF source.
+            str: Web source URL metadata for the PDF source.
         """
-        return {"source": self.web_path if self.web_path else self.file_path}
+        return self.web_path if self.web_path else self.file_path
+
+    def _convert_coords(self, coords: Tuple[Tuple[float]]) -> List[tuple]:
+        """Convert tuple of coordinates tuple pairs to list of tuple pairs.
+
+        Args:
+            coords (Tuple[Tuple[float]]): Tuple of coordinates tuple pairs.
+
+        Returns:
+            List[tuple]: List of coordinates tuple pairs.
+        """
+        return [list(coord) for coord in coords]
 
     def _chunk_documents(self, documents: List[Document], **kwargs) -> List[Document]:
         """Load and transform documents to chunks with NLTK sentence tokenizer.
@@ -55,7 +66,7 @@ class CustomPDFLoader(BasePDFLoader):
         Returns:
             List[Document]: List of Langchain Documents.
         """
-        source = self._get_metadata()
+        source = self._get_source()
         loader = UnstructuredPDFLoader(
             file_path=str(self.file_path),
             mode=self.mode,
@@ -63,7 +74,10 @@ class CustomPDFLoader(BasePDFLoader):
         )
         docs = loader.load()
         for doc in docs:
-            doc.metadata.update(source)
+            doc.metadata["source"] = source
+            doc.metadata["coordinates"]["points"] = self._convert_coords(
+                doc.metadata["coordinates"]["points"]
+            )
 
         if chunk_docs:
             return self._chunk_documents(documents=docs)
