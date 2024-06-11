@@ -1,22 +1,54 @@
-FROM python:3.10-slim
+# syntax=docker/dockerfile:1
 
-RUN pip install poetry==1.6.1
+# Comments are provided throughout this file to help you get started.
+# If you need more help, visit the Dockerfile reference guide at
+# https://docs.docker.com/go/dockerfile-reference/
 
-RUN poetry config virtualenvs.create false
+# Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
+
+ARG PYTHON_VERSION=3.10.14
+FROM python:${PYTHON_VERSION}-slim as base
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    git
+
+# Prevents Python from writing pyc files.
+ENV PYTHONDONTWRITEBYTECODE=1
+
+# Keeps Python from buffering stdout and stderr to avoid situations where
+# the application crashes without emitting any logs due to buffering.
+ENV PYTHONUNBUFFERED=1
 
 WORKDIR /code
 
-COPY ./pyproject.toml ./README.md ./poetry.lock* ./
+COPY ./api/build.toml ./pyproject.toml
+COPY ./api/README.md ./
+COPY ./asf_hp_installer_chatbot/__init__.py ./asf_hp_installer_chatbot/__init__.py
+COPY ./rag/ ./rag
+COPY ./api/app/ ./app
 
-COPY ./package[s] ./packages
+RUN python -m pip install .
+RUN python -m pip uninstall -y opencv-python opencv-contrib-python && python -m pip install opencv-python-headless==4.10.0.82
 
-RUN poetry install  --no-interaction --no-ansi --no-root
+## Create a non-privileged user that the app will run under.
+## See https://docs.docker.com/go/dockerfile-user-best-practices/
+#ARG UID=10001
+#RUN adduser \
+#    --disabled-password \
+#    --gecos "" \
+#    --home "/nonexistent" \
+#    --shell "/sbin/nologin" \
+#    --no-create-home \
+#    --uid "${UID}" \
+#    appuser
+#
+## Switch to the non-privileged user to run the application.
+#USER appuser
 
-COPY ../rag ./app/rag
-COPY ./app ./app
+EXPOSE 8000
 
-RUN poetry install --no-interaction --no-ansi
+# Specify virtual environment to PATH
+ENV VIRTUAL_ENV=/app/.venv
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-EXPOSE 8080
-
-CMD exec uvicorn app.server:app --host 0.0.0.0 --port 8080
+CMD ["uvicorn", "app.server:app", "--host", "0.0.0.0", "--port", "8080", "--loop", "uvloop"]
