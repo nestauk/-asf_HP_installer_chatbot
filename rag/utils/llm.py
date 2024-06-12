@@ -1,3 +1,5 @@
+import os
+
 from rag.utils.configurables import (
     llm_modelname_configurable,
     llm_temperature_configurable,
@@ -5,8 +7,11 @@ from rag.utils.configurables import (
 
 from langchain_openai import ChatOpenAI
 
+MODEL_NAME = os.environ.get("MODEL_NAME", "gpt-4o")
+TEMPERATURE = os.environ.get("TEMPERATURE", 0.5)
+
 openai_llm = ChatOpenAI(
-    model_name="gpt-3.5-turbo", temperature=0.5
+    model_name=MODEL_NAME, temperature=TEMPERATURE
 ).configurable_fields(
     model_name=llm_modelname_configurable(), temperature=llm_temperature_configurable()
 )
