@@ -1,4 +1,4 @@
-from rag.vector_databases import nibe_manual_retriever
+from rag.vector_databases import chatbot_retriever
 from rag.prompt_templates import chatbot_template, chatbot_with_history_template
 from rag.utils.llm import openai_llm
 from rag.utils.text_processing import format_source_docs
@@ -13,7 +13,7 @@ rag_chain = chatbot_template | openai_llm | StrOutputParser()
 
 rag_with_source_base = RunnableParallel(
     {
-        "context": nibe_manual_retriever | format_source_docs,
+        "context": chatbot_retriever | format_source_docs,
         "query": RunnablePassthrough(),
     }
 )

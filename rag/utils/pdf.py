@@ -1,3 +1,4 @@
+from asf_hp_installer_chatbot import config
 from rag.utils import Document
 
 from langchain_community.document_loaders.pdf import (
@@ -29,7 +30,12 @@ class CustomPDFLoader(BasePDFLoader):
         Returns:
             str: Web source URL metadata for the PDF source.
         """
-        return self.web_path if self.web_path else self.file_path
+        if self.web_path:
+            path = self.web_path
+        else:
+            path = config["doc_source_mapping"][Path(self.file_path).name]
+
+        return path
 
     def _convert_coords(self, coords: Tuple[Tuple[float]]) -> List[tuple]:
         """Convert tuple of coordinates tuple pairs to list of tuple pairs.
@@ -58,7 +64,7 @@ class CustomPDFLoader(BasePDFLoader):
         return splitter.transform_documents(docs)
 
     def load(self, chunk_docs: bool = False) -> List[Document]:
-        """Load documents, replaces source with web_path if available.
+        """Load documents, replaces source with web_path, or maps local filenames to it's source, if available.
 
         Args:
             chunk_docs (bool, optional): Option to chunk loaded documents with NLTK sentence tokenizer. Defaults to False.
