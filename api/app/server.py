@@ -6,7 +6,7 @@ from langserve import add_routes
 from langchain_core.runnables import RunnableConfig
 
 from app.utils.events import lifespan
-from rag import hp_installer_bot_chain
+from rag.chains import rag_chain_with_source
 from rag.utils.callbacks import langfuse_handler_from_config
 
 from app.client import chat
@@ -36,7 +36,7 @@ langfuse_handler = langfuse_handler_from_config(
 
 app.add_route("/hook", chat, methods=["POST"])
 
-chatbot_chain = hp_installer_bot_chain.with_config(
+chatbot_chain = rag_chain_with_source.with_config(
     RunnableConfig(callbacks=[langfuse_handler])
 )
 

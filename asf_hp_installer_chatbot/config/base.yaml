@@ -55,4 +55,12 @@ most_recent_embedding: outputs/embedding/vector_embeddings_55412b5ba9e3b26b64ee_
 pdf_dir: inputs/data/air2water_HP_installation_guides/database_pdf/
 pdf_to_web_dict:
   Nibe_F2040_231844-5.pdf: https://www.nibe.eu/assets/documents/16900/231844-5.pdf
+doc_dir: inputs/data/pdf/
+doc_source_mapping:
+  231844-5.pdf: https://www.nibe.eu/assets/documents/16900/231844-5.pdf
+  Heat-Pump-Guidance_MCS.pdf: https://mcscertified.com/wp-content/uploads/2020/07/Heat-Pump-Guide.pdf
+  BPEC_Section-4-J6022496-scientific-principles.pdf: https://bpec.org.uk/wp-content/uploads/2020/05/Section-4-J6022496-scientific-principles.pdf
+  BPEC_Section-5-D6022682-common-plumbing-processes.pdf: https://bpec.org.uk/wp-content/uploads/2020/05/Section-5-D6022682-common-plumbing-processes.pdf
+  BPEC_Section-7-F6022884-hot-water.pdf: https://bpec.org.uk/wp-content/uploads/2020/05/Section-7-F6022884-hot-water.pdf
+  BPEC_Section-8-Y6022888-central-heating.pdf: https://bpec.org.uk/wp-content/uploads/2020/05/Section-8-Y6022888-central-heating.pdf
 temp: 0.5

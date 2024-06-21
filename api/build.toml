@@ -10,6 +10,9 @@ packages = [
     { include = "asf_hp_installer_chatbot" },
 ]
 
+[tool.poetry.scripts]
+chatbot = "rag.cli:cli"
+
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
 uvicorn = {extras = ["standard"], version = "^0.23.2"}

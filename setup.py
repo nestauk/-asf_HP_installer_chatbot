@@ -1,4 +1,5 @@
 """asf_hp_installer_chatbot."""
+
 from pathlib import Path
 from setuptools import find_packages
 from setuptools import setup
@@ -23,4 +24,9 @@ setup(
     description="A Whatsapp chatbot prototype powered by an LLM which assists heat pump installers with their queries on the job.",
     author="DSP",
     license="MIT",
+    entry_points={
+        "console_scripts": [
+            "chatbot = rag.cli:cli",
+        ],
+    },
 )

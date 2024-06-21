@@ -40,6 +40,8 @@ services:
       - 8000:8000
     expose:
       - 8000
+    volumes:
+      - ../inputs/data/pdf:/documents:ro
     networks:
       - installer-chatbot
     depends_on:

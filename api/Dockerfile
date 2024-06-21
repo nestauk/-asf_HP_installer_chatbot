@@ -23,6 +23,7 @@ WORKDIR /code
 
 COPY ./api/build.toml ./pyproject.toml
 COPY ./api/README.md ./
+COPY ./asf_hp_installer_chatbot/config/ ./asf_hp_installer_chatbot/config
 COPY ./asf_hp_installer_chatbot/__init__.py ./asf_hp_installer_chatbot/__init__.py
 COPY ./rag/ ./rag
 COPY ./api/app/ ./app

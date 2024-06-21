@@ -2,9 +2,9 @@ import os
 import logging
 import shutil
 
-from rag import hp_installer_bot_chain
+from rag.chains import rag_chain_with_source
 from rag.vector_databases import (
-    nibe_qdrant_vdb,
+    init_vdb,
     db_path,
 )  # takes time to run indexing as well
 from rag.utils.callbacks import langfuse_handler_from_config
@@ -35,12 +35,12 @@ query = chatbot_prompt + " " + query_at_end
 
 
 def test_retrieval_query():
-    vectorstore_res = nibe_qdrant_vdb.similarity_search(query, k=4)
+    vectorstore_res = init_vdb().similarity_search(query, k=4)
 
     langfuse_handler = langfuse_handler_from_config()
 
     # returned sources are the same as the similarity search call
-    chatbot_res = hp_installer_bot_chain.invoke(
+    chatbot_res = rag_chain_with_source.invoke(
         query, config={"callbacks": [langfuse_handler]}
     )
 
