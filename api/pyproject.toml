@@ -25,8 +25,8 @@ langchain-community = "^0.2.2"
 langchain-core = "^0.2.4"
 qdrant-client = "1.9.1"
 langfuse = "2.26.1"
-torch = {version = "^2.3.0", source="torch"}
-torchvision = {version = "^0.18.0", source="torch"}
+torch = {version = "^2.3.0"}
+torchvision = {version = "^0.18.0"}
 transformers = "4.41.2"
 
 
