@@ -2,6 +2,7 @@ import os
 import logging
 import shutil
 
+from rag.utils.text_processing import format_source_docs
 from rag.chains import rag_chain_with_source
 from rag.vector_databases import (
     init_vdb,
@@ -35,12 +36,12 @@ query = chatbot_prompt + " " + query_at_end
 
 
 def test_retrieval_query():
-    vectorstore_res = init_vdb().similarity_search(query, k=4)
+    vectorstore_res = init_vdb(local=True).similarity_search(query, k=4)
 
     langfuse_handler = langfuse_handler_from_config()
 
     # returned sources are the same as the similarity search call
-    chatbot_res = rag_chain_with_source.invoke(
+    chatbot_res = rag_chain_with_source(local=True).invoke(
         query, config={"callbacks": [langfuse_handler]}
     )
 
@@ -50,11 +51,10 @@ def test_retrieval_query():
 
     logger.info("Chatbot reponse:")
     logger.info(chatbot_res["answer"])
-    logger.info("Chatbot Sources:")
-    for src in chatbot_res["context"]:
-        logger.info(src.metadata["source"])
+    logger.info("Chatbot context:")
+    logger.info(chatbot_res["context"])
 
-    assert vectorstore_res == chatbot_res["context"]
+    assert format_source_docs(vectorstore_res) == chatbot_res["context"]
 
 
 if __name__ == "__main__":
