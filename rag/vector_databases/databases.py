@@ -90,7 +90,6 @@ def init_vdb(
             raise ValueError(
                 "Cannot recreate a local collection. Remove the `--recreate` flag."
             )
-
         return local_vdb(collection_name, doc_directory=doc_directory)
     else:
         return remote_vdb(

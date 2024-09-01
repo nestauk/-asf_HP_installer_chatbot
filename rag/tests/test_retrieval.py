@@ -11,6 +11,7 @@ from datasets import Dataset
 from ragas import evaluate
 from ragas.metrics import faithfulness, answer_relevancy, context_utilization
 from langfuse import Langfuse
+from asf_hp_installer_chatbot import doc_dir_test
 
 langfuse_client = Langfuse()
 script_name = os.path.basename(__file__)
@@ -62,8 +63,9 @@ query = chatbot_prompt + " " + query_at_end
 
 
 def test_retrieval_query():
-    vectorstore_res = init_vdb(local=True).similarity_search(query, k=4)
-
+    vectorstore_res = init_vdb(
+        local=True, doc_directory=doc_dir_test
+    ).similarity_search(query, k=4)
     langfuse_handler = langfuse_handler_from_config()
 
     # returned sources are the same as the similarity search call

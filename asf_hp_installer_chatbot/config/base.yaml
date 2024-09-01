@@ -55,12 +55,40 @@ most_recent_embedding: outputs/embedding/vector_embeddings_55412b5ba9e3b26b64ee_
 pdf_dir: inputs/data/air2water_HP_installation_guides/database_pdf/
 pdf_to_web_dict:
   Nibe_F2040_231844-5.pdf: https://www.nibe.eu/assets/documents/16900/231844-5.pdf
+doc_dir_test: inputs/data/pdf_test/
 doc_dir: inputs/data/pdf/
+doc_source_mapping_test:
+  Nibe_F2040_231844-5.pdf: https://www.nibe.eu/assets/documents/16900/231844-5.pdf
 doc_source_mapping:
-  231844-5.pdf: https://www.nibe.eu/assets/documents/16900/231844-5.pdf
+  Nibe_F2040_231844-5.pdf: https://www.nibe.eu/assets/documents/16900/231844-5.pdf
   Heat-Pump-Guidance_MCS.pdf: https://mcscertified.com/wp-content/uploads/2020/07/Heat-Pump-Guide.pdf
   BPEC_Section-4-J6022496-scientific-principles.pdf: https://bpec.org.uk/wp-content/uploads/2020/05/Section-4-J6022496-scientific-principles.pdf
   BPEC_Section-5-D6022682-common-plumbing-processes.pdf: https://bpec.org.uk/wp-content/uploads/2020/05/Section-5-D6022682-common-plumbing-processes.pdf
   BPEC_Section-7-F6022884-hot-water.pdf: https://bpec.org.uk/wp-content/uploads/2020/05/Section-7-F6022884-hot-water.pdf
   BPEC_Section-8-Y6022888-central-heating.pdf: https://bpec.org.uk/wp-content/uploads/2020/05/Section-8-Y6022888-central-heating.pdf
+  Samsung_EHS_Mono_HT_Quiet_R32_8kW_12kW_16kW_AE***RXYDEG:AE***RXYDGG.pdf: https://downloadcenter.samsung.com/content/UM/202307/20230724171125643/EHS_R-32_MONO_OUTDOOR_IM_EU_DB68-11904A-03_EN.pdf
+  Samsung_EHS_Gen7_R290_withPump_5kW_8kW_12kW_16kW_AE***CXYB**.pdf: https://downloadcenter.samsung.com/content/UM/202310/20231031145946261/EHS_R290_MONO_With_Pump_OD_IM_EU_DB68-12498A-00_EN_231007.pdf
+  Samsung_EHS_R32_Monobloc_5kW_AE050RXYDEG.pdf: https://www.manualslib.com/download/3311700/Samsung-Ae050rxydeg.html
+  Samsung_EHS_R32_Monobloc_8kW_12kW_16kW_AE***BXYDEG:AE***BXYDGG.pdf: https://downloadcenter.samsung.com/content/UM/202404/20240424133601547/DB68-08408A-07_IM_EHS_R-32_MONO_OUTDOOR_EU_EN_240110-D01.pdf
+  Samsung_EHS_Gen7_R290_12kW_16kW_AE***CXYD**.pdf: https://downloadcenter.samsung.com/content/UM/202308/20230824154755163/EHS_R290_MONO_OD_IM_EU_DB68-12496A-00_EN_230814.pdf
+  vaillant_aroTHERM_plus_VWL_1*5_6_A_230V_S2_and_VWL_1*5_6_A_S2_operating_and_installation_instructions.pdf: https://www.vaillant.co.uk/product-systems/heat-pumps/arotherm-plus/
+  vaillant_aroTHERM_VWL_55_3_A_230_V_and_VWL_85_3_A_230_V.pdf: https://www.vaillant.co.uk/product-systems/heat-pumps/arotherm/
+  vaillant_flexoTHERM_exclusive_VWF_57_87_117_4_230V_installation_instructions.pdf: https://www.vaillant.co.uk/product-systems/heat-pumps/flexotherm/
+  Daikin_Altherma_low_temperature_split_installation_manual.pdf: https://www.daikin.eu/content/dam/document-library/installation-manuals/heat/air-to-water-heat-pump-low-temperature/EHVH-DV,DVG_4PEN499571-1B_2017_12_Installation%20manual_English.pdf
+  Daikin_Altherma_3_R_W_installation_manual.pdf: https://www.daikin.es/content/dam/document-library/installation-manuals/heat/air-to-water-heat-pump-low-temperature/EHBHX-D6V9W_4PEN618951-1_Installation%20manual_English.pdf
+  Daikin_Altherma_low_temperature_monobloc_installation_manual.pdf: https://www.daikin.co.uk/content/dam/document-library/installation-manuals/heat/air-to-water-heat-pump-low-temperature/eblq-cv3/EBLQ05-07CV3-EDLQ05-07CV3_4PEN403578-1F_Installation%20Manual_English.pdf
+  Daikin_Altherma_3_H_HT_installation_manual.pdf: https://www.daikin.co.uk/content/dam/document-library/installation-manuals/heat/air-to-water-heat-pump-high-temperature/EPRA014-018DV_EPRA014-018DW_4PEN586100-1_2019_07_installation%20manual_English.pdf
+  Daikin_Altherma_3_H_HT_Floor_installation_manual.pdf: https://www.daikin.co.uk/content/dam/document-library/installation-manuals/heat/air-to-water-heat-pump-high-temperature/EPRA014-018DV_EPRA014-018DW_4PEN586100-1_2019_07_installation%20manual_English.pdf
+  Ideal_logic_ASHP_installation_manual.pdf: https://idealheating.com/_gatsby/file/daf1dbfadcf90a0c3b48f78b569ffe2e/180624_Logic%20Air%20Heat%20Pump%20Install%20Guide.pdf.pdf?u=https%3A%2F%2Fassets.ctfassets.net%2Fsj902orc9wh4%2F5FKUo6gPWUCyj0m4RfNKyg%2Fd5d4375f496fd92d024775bc83279220%2F180624_Logic_Air_Heat_Pump_Install_Guide.pdf.pdf
+  Ideal_HP290_installation_manual.pdf: https://idealheating.com/_gatsby/file/8f3f81f516d38c755ca39e2ab54b6fd4/HP290%20Installation%20Manual.pdf?u=https%3A%2F%2Fdownloads.ctfassets.net%2Fsj902orc9wh4%2F17xZNLLA3Bfcvkxnbgyz0c%2F14382a9ad00ff31503ae62cfe2a6ef25%2FHP290_Installation_Manual.pdf
+  Ideal_alfea_extensa_duo_AI_R32_installation_manual.pdf: https://idealboilers.ie/uploads/documents/4.-2114-3-EN__ALFEA_EXTENSA_DUO_AI_R32__Install-Manual.pdf
+  Ideal_alfea_excellia_installation_servicing.pdf: https://idealboilers.ie/uploads/documents/Alfea_Excellia_Installation_Servicing.pdf
+  MIS-3005-D-Heat-Pump-Design-Issue-1.0.pdf: https://mcscertified.com/wp-content/uploads/2021/12/MIS-3005-D-Heat-Pump-Design-Issue-1.0.pdf
+  MIS-3005-I-Heat-Pump-Installation-Issue-1.0.pdf: https://mcscertified.com/wp-content/uploads/2021/12/MIS-3005-I-Heat-Pump-Installation-Issue-1.0.pdf
+  MCS-001-1-Issue-4.2_Final.pdf: https://mcscertified.com/wp-content/uploads/2021/10/MCS-001-1-Issue-4.2_Final.pdf
+  MCS-001-2-Issue-4.2_Final.pdf: https://mcscertified.com/wp-content/uploads/2021/10/MCS-001-2-Issue-4.2_Final.pdf
+  ENA_EV_chargepoint_and_HP_combined_installation_process_flowchart_v_3.pdf: https://www.energynetworks.org/assets/images/Resource%20library/Electric%20Vehilcle%20Chargepoint%20and%20Heat%20Pump%20Combined%20Installation%20Process%20Flow%20Chart%20v1.3.pdf?1724945458
+  ENA_HP_database_guide_document_v4_2_issued.pdf: https://www.energynetworks.org/assets/images/Resource%20library/[PDF]ENA%20HP%20Database%20Guide%20Document%20v4.2%20Issued.pdf?1724850523
+  ENA_connecting_EV_and_HP_to_networks.pdf: https://www.energynetworks.org/industry/connecting-to-the-networks/connecting-electric-vehicles-and-heat-pumps
+  ENA_DNO_cut_out_types_and_ratings_guidance.pdf: https://www.northernpowergrid.com/sites/default/files/2022-05/4816.pdf
 temp: 0.5

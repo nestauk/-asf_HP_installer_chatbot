@@ -37,3 +37,4 @@ config = get_yaml_config(_base_config_path)
 
 db_path: Path = PROJECT_DIR / "outputs/data/vector_db/qdrant/local_test"
 doc_dir: Path = PROJECT_DIR / config["doc_dir"]
+doc_dir_test: Path = PROJECT_DIR / config["doc_dir_test"]
