@@ -1,7 +1,7 @@
 import os
 import logging
 import shutil
-
+from asf_hp_installer_chatbot import doc_dir_test
 from rag.utils.text_processing import format_source_docs
 from rag.chains import rag_chain_with_source
 from rag.vector_databases import (
@@ -13,7 +13,7 @@ from datasets import Dataset
 from ragas import evaluate
 from ragas.metrics import faithfulness, answer_relevancy, context_utilization
 from langfuse import Langfuse
-from asf_hp_installer_chatbot import doc_dir_test
+
 
 langfuse_client = Langfuse()
 script_name = os.path.basename(__file__)
@@ -71,7 +71,7 @@ def test_retrieval_query():
     langfuse_handler = langfuse_handler_from_config()
 
     # returned sources are the same as the similarity search call
-    chatbot_res = rag_chain_with_source(local=True).invoke(
+    chatbot_res = rag_chain_with_source(local=True, doc_directory=doc_dir_test).invoke(
         query, config={"callbacks": [langfuse_handler]}
     )
     logger.info("Chatbot reponse:")
