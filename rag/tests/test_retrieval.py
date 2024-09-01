@@ -1,6 +1,8 @@
 import os
 import logging
 import shutil
+
+from rag.utils.text_processing import format_source_docs
 from rag.chains import rag_chain_with_source
 from rag.vector_databases import (
     init_vdb,
@@ -69,7 +71,7 @@ def test_retrieval_query():
     langfuse_handler = langfuse_handler_from_config()
 
     # returned sources are the same as the similarity search call
-    chatbot_res = rag_chain_with_source.invoke(
+    chatbot_res = rag_chain_with_source(local=True).invoke(
         query, config={"callbacks": [langfuse_handler]}
     )
     logger.info("Chatbot reponse:")
