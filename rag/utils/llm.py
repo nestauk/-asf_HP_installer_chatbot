@@ -7,7 +7,7 @@ from rag.utils.configurables import (
 
 from langchain_openai import ChatOpenAI
 
-MODEL_NAME = os.environ.get("MODEL_NAME", "gpt-4o")
+MODEL_NAME = os.environ.get("MODEL_NAME", "gpt-4o-mini")
 TEMPERATURE = os.environ.get("TEMPERATURE", 0.5)
 
 openai_llm = ChatOpenAI(
