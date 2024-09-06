@@ -7,7 +7,7 @@
 # Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
 ARG PYTHON_VERSION=3.10.14
-FROM python:${PYTHON_VERSION}-slim as base
+FROM python:${PYTHON_VERSION}-slim AS base
 RUN apt-get update && apt-get install -y \
     build-essential \
     git
@@ -28,23 +28,25 @@ COPY ./asf_hp_installer_chatbot/__init__.py ./asf_hp_installer_chatbot/__init__.
 COPY ./rag/ ./rag
 COPY ./api/app/ ./app
 
-RUN python -m pip install .
-RUN python -m pip uninstall -y opencv-python opencv-contrib-python && python -m pip install opencv-python-headless==4.10.0.82
+RUN python -m pip install --no-cache-dir .
+RUN python -m pip uninstall -y opencv-python opencv-contrib-python && python -m pip install --no-cache-dir opencv-python-headless==4.10.0.82
 
-## Create a non-privileged user that the app will run under.
-## See https://docs.docker.com/go/dockerfile-user-best-practices/
-#ARG UID=10001
-#RUN adduser \
-#    --disabled-password \
-#    --gecos "" \
-#    --home "/nonexistent" \
-#    --shell "/sbin/nologin" \
-#    --no-create-home \
-#    --uid "${UID}" \
-#    appuser
-#
-## Switch to the non-privileged user to run the application.
-#USER appuser
+# Create a non-privileged user that the app will run under.
+# See https://docs.docker.com/go/dockerfile-user-best-practices/
+ARG UID=10001
+RUN adduser \
+    --disabled-password \
+    --gecos "" \
+    --home "/nonexistent" \
+    --shell "/sbin/nologin" \
+    --no-create-home \
+    --uid "${UID}" \
+    appuser
+# add permissions to /code
+RUN chown -R appuser:appuser /code
+
+# Switch to the non-privileged user to run the application.
+USER appuser
 
 EXPOSE 8000
 
