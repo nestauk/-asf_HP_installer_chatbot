@@ -23,7 +23,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[Any, None]:
     handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
     logger.addHandler(handler)
 
-    if os.environ.get("NGROK_AUTHTOKEN") is not None:
+    if (os.environ.get("NGROK_AUTHTOKEN") is not None) and (
+        os.environ.get("USE_NGROK", False)
+    ):
         import ngrok
 
         listener = await ngrok.forward(8000, authtoken_from_env=True)
