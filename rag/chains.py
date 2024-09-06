@@ -26,7 +26,7 @@ def rag_with_source_base(**kwargs) -> RunnableParallel:
     """
     return RunnableParallel(
         {
-            "context": init_chatbot_retriever(**kwargs) | format_source_docs,
+            "context": init_chatbot_retriever(**kwargs),# | format_source_docs,
             "query": RunnablePassthrough(),
         }
     )
