@@ -24,4 +24,4 @@ langfuse
 ragas>=0.1.16
 ngrok>=1.4.0
 twilio>=9.2.4
-uvicorn[standard]>=0.30.6
+uvicorn[standard]>=0.23.2
