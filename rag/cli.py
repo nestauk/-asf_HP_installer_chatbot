@@ -1,6 +1,7 @@
 import os
 import click
 from asf_hp_installer_chatbot import config
+from typing import Optional
 
 
 @click.group(name="chatbot")
@@ -73,6 +74,49 @@ def init_vdb_cmd(
             pdf_ingest_mode=pdf_ingest_mode,
             max_workers=max_workers,
             chunk_docs=chunk_docs,
+        )
+    except Exception as e:
+        click.echo(f"Exception: {e}")
+
+
+@cli.command(
+    name="test_query",
+    context_settings=dict(ignore_unknown_options=True, allow_extra_args=True),
+)
+@click.option(
+    "--url",
+    default=os.environ.get("QDRANT_URL", "http://qdrant-vdb:6334"),
+    help="URL of the Qdrant server.",
+)
+@click.option(
+    "--collection_name",
+    default=config["index_name"],
+    help="Name of the collection to use.",
+)
+@click.option(
+    "--query",
+    help="Query to test.",
+    type=Optional[str],
+)
+def test_retrieval_query(
+    ctx,
+    url: str,
+    collection_name: str,
+    query: Optional[str],
+):
+    """Test the retrieval of a query"""
+    try:
+        from rag.tests.test_retrieval import test_retrieval_query, query_at_end
+
+        extra_kwargs = {
+            ctx.args[i][2:]: ctx.args[i + 1] for i in range(0, len(ctx.args), 2)
+        }
+
+        test_retrieval_query(
+            query=query if query is not None else query_at_end,
+            url=url,
+            collection_name=collection_name,
+            **extra_kwargs,
         )
     except Exception as e:
         click.echo(f"Exception: {e}")
