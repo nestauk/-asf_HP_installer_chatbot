@@ -51,6 +51,7 @@ def cli(ctx):
     default=False,
     help="Chunk documents into sentences.",
 )
+@click.pass_context
 def init_vdb_cmd(
     local: bool,
     url: str,
@@ -98,6 +99,7 @@ def init_vdb_cmd(
     help="Query to test.",
     type=Optional[str],
 )
+@click.pass_context
 def test_retrieval_query(
     ctx,
     url: str,
