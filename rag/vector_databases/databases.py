@@ -13,7 +13,11 @@ logger = logging.getLogger("qdrant_vdb")
 
 
 def local_vdb(
-    collection_name: str = config["index_name"], doc_directory: str = doc_dir
+    collection_name: str = config["index_name"],
+    doc_directory: str = doc_dir,
+    mode: str = "paged",
+    max_workers: int = 10,
+    chunk_docs: bool = False,
 ) -> Qdrant:
 
     try:
@@ -27,7 +31,12 @@ def local_vdb(
             logger.info("Deleted existing local vector database directory.")
 
         vdb = Qdrant.from_documents(
-            documents=load_transformed_docs(doc_directory=doc_directory),
+            documents=load_transformed_docs(
+                doc_directory=doc_directory,
+                mode=mode,
+                max_workers=max_workers,
+                chunk_docs=chunk_docs,
+            ),
             embedding=openai_embeddings,
             path=db_path,
             collection_name=collection_name,
@@ -44,6 +53,9 @@ def remote_vdb(
     collection_name: str = config["index_name"],
     doc_directory: str = doc_dir,
     recreate=False,
+    mode: str = "paged",
+    max_workers: int = 10,
+    chunk_docs: bool = False,
 ) -> Qdrant:
     client_params = {
         "url": url,
@@ -70,7 +82,12 @@ def remote_vdb(
         logger.error(f"Exception: {e}")
         logger.info("Creating a new collection...")
         vdb = Qdrant.from_documents(
-            documents=load_transformed_docs(doc_directory=doc_directory),
+            documents=load_transformed_docs(
+                doc_directory=doc_directory,
+                mode=mode,
+                max_workers=max_workers,
+                chunk_docs=chunk_docs,
+            ),
             embedding=openai_embeddings,
             **client_params,
         )
@@ -84,17 +101,30 @@ def init_vdb(
     collection_name: str = config["index_name"],
     doc_directory: str = doc_dir,
     recreate: bool = False,
+    pdf_ingest_mode: str = "paged",
+    max_workers: int = 10,
+    chunk_docs: bool = False,
+    **kwargs,
 ) -> Qdrant:
     if local:
         if recreate:
             raise ValueError(
                 "Cannot recreate a local collection. Remove the `--recreate` flag."
             )
-        return local_vdb(collection_name, doc_directory=doc_directory)
+        return local_vdb(
+            collection_name,
+            doc_directory=doc_directory,
+            mode=pdf_ingest_mode,
+            max_workers=max_workers,
+            chunk_docs=chunk_docs,
+        )
     else:
         return remote_vdb(
             url=url,
             collection_name=collection_name,
             recreate=recreate,
             doc_directory=doc_directory,
+            mode=pdf_ingest_mode,
+            max_workers=max_workers,
+            chunk_docs=chunk_docs,
         )
