@@ -19,6 +19,11 @@ rag_with_history_chain = chatbot_with_history_template | openai_llm | StrOutputP
 
 
 def rag_with_source_base(**kwargs) -> RunnableParallel:
+    """Initializes a chatbot chain with a context retriever. Kwargs are passed to init_vdb and the retriever.
+
+    Returns:
+        RunnableParallel: Chatbot chain with context retriever.
+    """
     return RunnableParallel(
         {
             "context": init_chatbot_retriever(**kwargs) | format_source_docs,
@@ -28,6 +33,11 @@ def rag_with_source_base(**kwargs) -> RunnableParallel:
 
 
 def rag_chain_with_source(**kwargs) -> RunnableSerializable:
+    """Initializes a chatbot chain with a source retriever. Kwargs are passed to init_vdb and the retriever. This chain makes it possible to retrieve the source documents from the retriever by referencing the "context" key in the output.
+
+    Returns:
+        RunnableSerializable: Chatbot chain with source retriever.
+    """
     return rag_with_source_base(**kwargs).assign(
         answer=rag_chain
     )  # Chain assignments aren't dynamically configurable yet
