@@ -16,7 +16,7 @@ def init_chatbot_retriever(**kwargs) -> VectorStoreRetriever:
     """
     return (
         init_vdb(**kwargs)
-        .as_retriever()
+        .as_retriever(**kwargs)
         .configurable_fields(
             search_type=retriever_searchtype_configurable(),
             search_kwargs=retriever_searchkwargs_configurable(),
