@@ -61,19 +61,29 @@ query_at_end = (
 )
 
 
-query = chatbot_prompt + " " + query_at_end
+def test_retrieval_query(query: str = query_at_end, **kwargs):
+    #### <EXPERIMENT_BLOCK> this block of code can be changed for experimentation
 
+    query = chatbot_prompt + " " + query_at_end
+    vectorstore_res = init_vdb(**kwargs).similarity_search(
+        query, k=4
+    )  # or **kwargs and set k in kwargs
+    # mmr_res = init_vdb(**kwargs).max_marginal_relevance_search(query, **kwargs)
+    langfuse_handler = langfuse_handler_from_config(
+        trace_name="ExperimentalTest",
+        user_id="Local",
+        tags=["dev", "experimental", "test"],
+    )
 
-def test_retrieval_query():
-    vectorstore_res = init_vdb(
-        local=True, doc_directory=doc_dir_test
-    ).similarity_search(query, k=4)
-    langfuse_handler = langfuse_handler_from_config()
-
+    ### YOU WILL NEED TO CHANGE THE RETRIEVER IN THE CHAIN AS WELL
     # returned sources are the same as the similarity search call
-    chatbot_res = rag_chain_with_source(local=True, doc_directory=doc_dir_test).invoke(
+    # TODO: update testing with CLI tooling arguments
+    chatbot_res = rag_chain_with_source(**kwargs).invoke(
         query, config={"callbacks": [langfuse_handler]}
     )
+
+    #### </EXPERIMENT_BLOCK>
+
     logger.info("Chatbot reponse:")
     logger.info(chatbot_res["answer"])
     logger.info("Chatbot Sources:")
