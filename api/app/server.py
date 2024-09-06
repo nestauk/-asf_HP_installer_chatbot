@@ -36,7 +36,7 @@ langfuse_handler = langfuse_handler_from_config(
 
 app.add_route("/hook", chat, methods=["POST"])
 
-chatbot_chain = rag_chain_with_source.with_config(
+chatbot_chain = rag_chain_with_source().with_config(
     RunnableConfig(callbacks=[langfuse_handler])
 )
 

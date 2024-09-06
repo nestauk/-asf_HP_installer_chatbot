@@ -43,7 +43,7 @@ async def chat(request: Request) -> Response:
     )  # TODO move to env vars
 
     # chat with history is disabled for now
-    chain_res = await rag_chain_with_source.ainvoke(
+    chain_res = await rag_chain_with_source().ainvoke(
         body,
         config={
             "configurable": {"session_id": chat_session_id},
