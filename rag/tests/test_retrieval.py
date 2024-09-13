@@ -68,7 +68,7 @@ def test_retrieval_query(query: str = query_at_end, **kwargs):
     vectorstore_res = init_vdb(**kwargs).similarity_search(
         query, k=4
     )  # or **kwargs and set k in kwargs
-    # mmr_res = init_vdb(**kwargs).max_marginal_relevance_search(query, **kwargs)
+    # mmr_res = init_vdb(**kwargs).max_marginal_relevance_search(query, k=4, fetch_k=20)
     langfuse_handler = langfuse_handler_from_config(
         trace_name="ExperimentalTest",
         user_id="Local",
