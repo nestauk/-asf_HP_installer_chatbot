@@ -1,0 +1,47 @@
+[tool.poetry]
+name = "api"
+version = "0.1.0"
+description = "api for asf-hp-installer-chatbot"
+authors = ["Solomon Yu <solomon.yu@nesta.org.uk>"]
+readme = "README.md"
+packages = [
+    { include = "app" },
+    { include = "rag" },
+    { include = "asf_hp_installer_chatbot" },
+]
+
+[tool.poetry.scripts]
+chatbot = "rag.cli:cli"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+uvicorn = {extras = ["standard"], version = "^0.23.2"}
+langserve = {extras = ["server"], version = ">=0.0.30"}
+pydantic = ">=2"
+twilio = ">=9.2.4"
+ngrok = ">=1.4.0"
+unstructured = {extras = ["pdf"], version = ">=0.15.9"}
+nltk = "3.8.1"
+langchain = ">=0.2.2"
+langchain-text-splitters = ">=0.2.4"
+langchain-anthropic = ">=0.1.23"
+langchain-openai = ">=0.1.23"
+langchain-community = ">=0.2.16"
+langchain-core = ">=0.2.38"
+qdrant-client = ">=1.11.1"
+langfuse = ">=2.46.0"
+ragas = "==0.1.16"
+torch = {url = "https://download.pytorch.org/whl/cpu/torch-2.3.1%2Bcpu-cp310-cp310-linux_x86_64.whl"}
+torchvision = {url = "https://download.pytorch.org/whl/cpu/torchvision-0.18.1%2Bcpu-cp310-cp310-linux_x86_64.whl"}
+transformers = "4.41.2"
+
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+langchain-cli = ">=0.0.15"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
