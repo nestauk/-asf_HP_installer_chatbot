@@ -41,4 +41,4 @@ def format_source_docs(docs: List[Document]) -> str:
     Returns:
         str: Formatted source document string.
     """
-    return "\n\n".join(doc.page_content for doc in docs)
+    return "\n\n".join(doc.model_dump_json() for doc in docs)

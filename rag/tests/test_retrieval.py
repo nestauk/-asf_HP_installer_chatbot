@@ -11,7 +11,7 @@ from rag.vector_databases import (
 from rag.utils.callbacks import langfuse_handler_from_config
 from datasets import Dataset
 from ragas import evaluate
-from ragas.metrics import faithfulness, answer_relevancy, context_utilization
+from ragas.metrics import faithfulness, answer_relevancy, ContextUtilization
 from langfuse import Langfuse
 
 
@@ -65,9 +65,12 @@ def test_retrieval_query(query: str = query_at_end, **kwargs):
     #### <EXPERIMENT_BLOCK> this block of code can be changed for experimentation
 
     query = chatbot_prompt + " " + query_at_end
-    vectorstore_res = init_vdb(**kwargs).similarity_search(
-        query, k=4
-    )  # or **kwargs and set k in kwargs
+    with init_vdb(**kwargs) as vdb:
+        assert vdb.client.collection_exists(kwargs["collection_name"])
+
+        vectorstore_res = vdb.similarity_search(
+            query, k=4
+        )  # or **kwargs and set k in kwargs
     # mmr_res = init_vdb(**kwargs).max_marginal_relevance_search(query, k=4, fetch_k=20)
     langfuse_handler = langfuse_handler_from_config(
         trace_name="ExperimentalTest",
@@ -78,9 +81,8 @@ def test_retrieval_query(query: str = query_at_end, **kwargs):
     ### YOU WILL NEED TO CHANGE THE RETRIEVER IN THE CHAIN AS WELL
     # returned sources are the same as the similarity search call
     # TODO: update testing with CLI tooling arguments
-    chatbot_res = rag_chain_with_source(**kwargs).invoke(
-        query, config={"callbacks": [langfuse_handler]}
-    )
+    with rag_chain_with_source(**kwargs) as rag_chain:
+        chatbot_res = rag_chain.invoke(query, config={"callbacks": [langfuse_handler]})
 
     #### </EXPERIMENT_BLOCK>
 
@@ -105,7 +107,7 @@ def test_retrieval_query(query: str = query_at_end, **kwargs):
     result = evaluate(
         dataset=dataset,
         metrics=[
-            context_utilization,
+            ContextUtilization(),
             faithfulness,
             answer_relevancy,
         ],
