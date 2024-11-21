@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,10 +14,13 @@ from app.client import chat
 
 from datasets import Dataset
 from ragas import evaluate
-from ragas.metrics import faithfulness, answer_relevancy, context_utilization
+from ragas.metrics import faithfulness, answer_relevancy, ContextUtilization
 
-import sys
+import os, sys
 import logging
+from typing import Dict, Any
+
+import numpy as np
 
 
 def get_logger():
@@ -45,61 +48,28 @@ app.add_middleware(
 
 langfuse_handler = langfuse_handler_from_config(
     trace_name="hp_installer_chatbot_chain",
-    user_id="testing",
-    session_id="local",
-    version="0.1.0",
-    release="0.1.0",
-    tags=["dev", "api", "v1"],
-)  # TODO move to env vars
+    user_id="testing",  # TODO: change to UUID
+    session_id="local",  # TODO: change to UUID + Date
+    version="0.1.0",  # TODO Customise these/ move to .env
+    release="0.1.0",  # TODO Customise these/ move to .env
+    tags=["dev", "api", "v1"],  # TODO Customise these/ move to .env
+)
 
 app.add_route("/hook", chat, methods=["POST"])
 
-chatbot_chain = rag_chain_with_source().with_config(
-    RunnableConfig(callbacks=[langfuse_handler])
-)
-
-add_routes(
-    app,
-    chatbot_chain,
-    # path="/chat", # renames first span from RunnableSequence to "/chat"
-    # disabled_endpoints=["playground"] # temporarily disabled due to security risk
-)
+with rag_chain_with_source() as chatbot_chain:
+    add_routes(
+        app,
+        chatbot_chain.with_config(RunnableConfig(callbacks=[langfuse_handler])),
+    )
 
 ## Evaluation
-init_ragas_metrics([faithfulness, answer_relevancy, context_utilization])
+context_utilization = ContextUtilization()
+metrics = [faithfulness, answer_relevancy, context_utilization]
+init_ragas_metrics(metrics)
 
 
-@app.post("/score")
-def score(trace_id: str) -> JSONResponse:
-    """
-    Score a trace with RAGAS.
-    This function is defined synchronous as the RAGAS evaluate() function does not support uvloop at this time.
-    This endpoint takes a trace_id (str) and responds with the scores for the trace (JSONResponse).
-
-    The scores response has the following SUCCESS schema,
-
-    {
-        "trace_id": str,
-        "scores": {
-            "context_utilization": float,
-            "faithfulness": float,
-            "answer_relevancy": float
-        }
-    }
-
-    and the following ERROR schema,
-
-    {
-        "error": str
-    }
-
-    Args:
-        trace_id (str): The trace ID to score
-
-    Returns:
-        JSONResponse: The scores for the trace or error.
-    """
-    # Get the trace
+async def get_trace_data(trace_id: str) -> Dict[str, Any]:
     observations = [
         obs
         for obs in langfuse_handler.langfuse.fetch_trace(trace_id).data.observations
@@ -127,48 +97,74 @@ def score(trace_id: str) -> JSONResponse:
     except AssertionError as e:
         response = f"Data could not be evaluated: {e}"
         logger.error(response)
-        return JSONResponse(
-            content=jsonable_encoder({"error": response}),
-            status_code=400,
-            media_type="application/json",
+
+    evaluation_batch = {
+        "question": query,
+        "contexts": retriever_context if retriever_context else context,
+        "answer": answer,
+    }
+
+    return evaluation_batch
+
+
+async def evaluate_response(
+    query: str, contexts: list, answer: str
+) -> Dict[str, float]:
+    scores = {}
+    for m in metrics:
+        scores[m.name] = await m.ascore(
+            row={"question": query, "contexts": contexts, "answer": answer}
+        )
+    return scores
+
+
+async def send_scores(trace_id: str, result: Dict[str, float]) -> None:
+    for metric_name, metric_value in result.items():
+        # Ensure NaN values are converted Python floats
+        score_value = (
+            np.nan_to_num(metric_value) if np.isnan(metric_value) else metric_value
         )
 
-    # Construct evaluation dataset
-    evaluation_batch = {
-        "question": [query],
-        "contexts": [retriever_context if retriever_context else [context]],
-        "retreived_contexts": [retriever_context if retriever_context else [context]],
-        "answer": [answer],
-    }
-    ds = Dataset.from_dict(evaluation_batch)
+        logger.info(f"Sending {metric_name} score to Langfuse: {score_value}")
+        langfuse_handler.langfuse.score(
+            trace_id=trace_id,
+            name=metric_name,
+            value=score_value,
+            type="NUMERIC",
+            comment=f"Ground-truthless RAGAS LLM-based score",
+        )
 
-    # Score with RAGAS - cannot be run with uvloop
-    res = (
-        evaluate(ds, [faithfulness, answer_relevancy, context_utilization])
-        .to_pandas()
-        .to_dict()
+
+async def run_evaluation(trace_id: str) -> Dict[str, float]:
+    trace_data = await get_trace_data(trace_id)
+    result = await evaluate_response(
+        query=trace_data["question"],
+        contexts=trace_data["contexts"],
+        answer=trace_data["answer"],
     )
 
-    response = {
-        "trace_id": trace_id,
-        "scores": {},
-    }
+    await send_scores(trace_id, result)
 
-    # Send score to Langfuse
-    metric_names = ["context_utilization", "faithfulness", "answer_relevancy"]
-    for metric_name, metric_value in res.items():
-        if metric_name in metric_names:
-            logger.info(f"Sending {metric_name} score to Langfuse: {metric_value[0]}")
-            langfuse_handler.langfuse.score(
-                trace_id=trace_id,
-                name=metric_name,
-                value=metric_value[0],
-                comment=f"Ground-truthless RAGAS LLM-based score",
-            )
-            response["scores"][metric_name] = metric_value[0]
+
+@app.post("/score")
+def score(trace_id: str, background_tasks: BackgroundTasks) -> JSONResponse:
+    """
+    Score a trace with RAGAS.
+    This endpoint takes a trace_id and scores the trace with RAGAS metrics: faithfulness, answer_relevancy, and context_utilization.
+
+    The evaluation is done asynchronously using FastAPI's BackgroundTasks.
+
+    Args:
+        trace_id (str): The trace_id of the trace to be scored
+        background_tasks (BackgroundTasks): FastAPI background task manager
+
+    Returns:
+        JSONResponse: Message indicating that scoring the trace with trace_id was requested
+    """
+    background_tasks.add_task(run_evaluation, trace_id)
 
     return JSONResponse(
-        content=jsonable_encoder(response),
+        content=f"Requested to evaluate trace: {trace_id}",
         media_type="application/json",
     )
 
