@@ -1,10 +1,9 @@
 # Heat Pump Installer Chatbot Prototype
 
-This repository contains the **Heat Pump Installer Chatbot**, a prototype chatbot designed to assist heat pump installers with on-the-job queries via WhatsApp. Built with a focus on large language model (LLM) integration, the chatbot serves as a knowledge-enhancing tool, enabling installers to access relevant information and solutions in real time.
+This repository contains the **Heat Pump Installer Chatbot**, a prototype chatbot designed to assist heat pump installers with on-the-job queries via WhatsApp. Built with a focus on large language model (LLM) integration, the chatbot serves as a knowledge-enhancing tool, enabling installers to access relevant information and solutions in real time. We have also developed an easy-to-use Streamlit based frontend that sits on top of this chatbot, which can be found [here](https://github.com/nestauk/hpi_chatbot_frontend).
 
 ## Key Features
 
-- **WhatsApp Integration**: Chatbot accessible directly from WhatsApp for seamless communication.
 - **Powered by LLM**: Utilises advanced language models to provide accurate and contextual responses.
 - **Installer-Focused**: Designed with the needs of heat pump installers in mind, offering targeted insights and troubleshooting support.
 
@@ -24,25 +23,13 @@ For detailed instructions on getting the app up and running, see the [README](ap
 
 -asf_HP_installer_chatbot/
 ├── api/                         # Core chatbot application code
-├── asf_hp_installer_chatbot/    # Pipeline code
+├── asf_hp_installer_chatbot/    # Archive development and proof of concept (PoC) code.
 ├── rag/                         # Retrieval Augmented Generation (RAG) code
 ├── docs/                        # Documentation
 ├── .env.template                # Environment variable template
 ├── requirements.txt             # Python dependencies
 ├── Makefile                     # Automation commands
 └── README.md                    # Project overview
-
-## Usage
-
-Once the chatbot is running, it connects to WhatsApp to handle user queries. Follow these steps to start using the bot:
-
-1. **Deploy the Bot**:
-   - Use the Twilio WhatsApp API to set up the connection.
-   - Update the .env file with your Twilio API credentials and chatbot settings.
-
-2. **Test the Chatbot**:
-   - Send messages via WhatsApp to the configured bot number.
-   - The chatbot will respond with relevant information or troubleshooting steps.
 
 ## Contributing
 
