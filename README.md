@@ -6,6 +6,7 @@ This repository contains the **Heat Pump Installer Chatbot**, a prototype chatbo
 
 - **Powered by LLM**: Utilises advanced language models to provide accurate and contextual responses.
 - **Installer-Focused**: Designed with the needs of heat pump installers in mind, offering targeted insights and troubleshooting support.
+- **Frontend Integration**: Seamless integration with front ends, such as our Streamlit implementation [here](https://github.com/nestauk/hpi_chatbot_frontend). Also possible to connect to via methods such as Whatsapp.
 
 ## Prerequisites
 
