@@ -5,7 +5,7 @@ This repository contains the **Heat Pump Installer Chatbot**, a prototype chatbo
 ## Key Features
 
 - **WhatsApp Integration**: Chatbot accessible directly from WhatsApp for seamless communication.
-- **Powered by LLM**: Utilizes advanced language models to provide accurate and contextual responses.
+- **Powered by LLM**: Utilises advanced language models to provide accurate and contextual responses.
 - **Installer-Focused**: Designed with the needs of heat pump installers in mind, offering targeted insights and troubleshooting support.
 
 ## Prerequisites
@@ -18,7 +18,7 @@ Before setting up the project, ensure you have the following installed:
 
 ## Installation & Deployment
 
-For detailed instructions on getting the app up and running, see the README in the `api` directory
+For detailed instructions on getting the app up and running, see the [README](api/README.md) in the `api` directory
 
 ## Project Structure
 
