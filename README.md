@@ -6,7 +6,7 @@ This repository contains the **Heat Pump Installer Chatbot**, a prototype chatbo
 
 - **Powered by LLM**: Utilises advanced language models to provide accurate and contextual responses.
 - **Installer-Focused**: Designed with the needs of heat pump installers in mind, offering targeted insights and troubleshooting support.
-- **Frontend Integration**: Seamless integration with front ends, such as our Streamlit implementation [here](https://github.com/nestauk/hpi_chatbot_frontend). Also possible to connect to via methods such as Whatsapp.
+- **Frontend Integration**: Seamless integration with front ends, such as our Streamlit implementation [here](https://github.com/nestauk/hpi_chatbot_frontend). Also possible to connect to WhatsApp via a Twilio webhook.
 
 ## Prerequisites
 
@@ -22,28 +22,30 @@ For detailed instructions on getting the app up and running, see the [README](ap
 
 ## Project Structure
 
+```
 -asf_HP_installer_chatbot/
 ├── api/                         # Core chatbot application code
-├── asf_hp_installer_chatbot/    # Archive development and proof of concept (PoC) code.
+├── asf_hp_installer_chatbot/    # Archive proof of concept (PoC) code.
 ├── rag/                         # Retrieval Augmented Generation (RAG) code
 ├── docs/                        # Documentation
 ├── .env.template                # Environment variable template
 ├── requirements.txt             # Python dependencies
 ├── Makefile                     # Automation commands
 └── README.md                    # Project overview
+```
 
 ## Contributing
 
 We welcome contributions! To get started:
 
 1. Fork this repository and create your feature branch:
-   ```git checkout -b feature/your-feature```
+   `git checkout -b feature/your-feature`
 
 2. Commit your changes:
-   ```git commit -m "Add your feature"```
+   `git commit -m "Add your feature"`
 
 3. Push to the branch:
-   ```git push origin feature/your-feature```
+   `git push origin feature/your-feature`
 
 4. Open a pull request.
 
