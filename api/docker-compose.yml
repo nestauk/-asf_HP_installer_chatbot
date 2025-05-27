@@ -27,9 +27,11 @@ services:
     volumes:
       - ./qdrant_data:/qdrant/storage
     networks:
-      - installer-chatbot
+      - default
   app:
     container_name: asf-hpi-chatbot
+    image: ${DOCKER_REGISTRY}/asf-hpi-chatbot:api-latest-${STAGE}
+    restart: always
     platform: linux/amd64
     build:
       context: ../
@@ -41,9 +43,9 @@ services:
     expose:
       - 8000
     volumes:
-      - ../inputs/data/pdf:/documents:ro
+      - ./documents:/documents:ro
     networks:
-      - installer-chatbot
+      - default
     depends_on:
       - qdrant
     command:
@@ -64,5 +66,5 @@ configs:
       log_level: INFO
 
 networks:
-  installer-chatbot:
+  default:
     driver: bridge
