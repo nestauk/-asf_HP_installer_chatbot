@@ -35,6 +35,7 @@ with rag_chain_with_source() as chatbot_chain:
     add_routes(
         app,
         chatbot_chain.with_config(RunnableConfig(callbacks=[langfuse_handler])),
+        disabled_endpoints=["playground"],
     )
 
 ## Evaluation
