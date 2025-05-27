@@ -13,22 +13,10 @@ from datasets import Dataset
 from ragas import evaluate
 from ragas.metrics import faithfulness, answer_relevancy, ContextUtilization
 
-import os, sys
-import logging
 from typing import Dict, Any
 
 import numpy as np
 
-
-def get_logger():
-    logger = logging.getLogger("HPInstallerChatbotAPI")
-    logger.setLevel(logging.INFO)
-    logging.StreamHandler(sys.stdout)
-    logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    return logger
-
-
-logger = get_logger()
 
 app = FastAPI(lifespan=lifespan)
 
