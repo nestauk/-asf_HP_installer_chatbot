@@ -10,7 +10,6 @@ from app.utils.events import lifespan
 from rag.chains import rag_chain_with_source
 from rag.utils.callbacks import langfuse_handler_from_config, init_ragas_metrics
 
-from app.client import chat
 
 from datasets import Dataset
 from ragas import evaluate
@@ -55,7 +54,6 @@ langfuse_handler = langfuse_handler_from_config(
     tags=["dev", "api", "v1"],  # TODO Customise these/ move to .env
 )
 
-app.add_route("/hook", chat, methods=["POST"])
 
 with rag_chain_with_source() as chatbot_chain:
     add_routes(
