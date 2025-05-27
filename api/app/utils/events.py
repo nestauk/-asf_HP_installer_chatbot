@@ -23,14 +23,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[Any, None]:
     handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
     logger.addHandler(handler)
 
-    if (os.environ.get("NGROK_AUTHTOKEN") is not None) and (
-        os.environ.get("USE_NGROK", False)
-    ):
-        import ngrok
-
-        listener = await ngrok.forward(8000, authtoken_from_env=True)
-        logger.info(f"Ingress established at {listener.url()}")
-
     if os.environ.get("QDRANT_URL") is not None:
         logger.info("QDRANT_URL is set. Using hosted qdrant server.")
     else:
@@ -38,8 +30,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[Any, None]:
 
     yield
     # Lines after yield statement execute when the application stops.
-
-    await listener.close()
 
     from rag.vector_databases import db_path
 

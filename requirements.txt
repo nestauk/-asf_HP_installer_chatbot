@@ -22,6 +22,5 @@ unstructured[pdf]>=0.14.7
 onnx==1.16.1
 langfuse
 ragas>=0.1.16
-ngrok>=1.4.0
 twilio>=9.2.4
 uvicorn[standard]>=0.23.2
