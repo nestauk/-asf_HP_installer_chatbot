@@ -110,6 +110,7 @@ target/
 !/outputs/data/*.md
 /outputs/models/*
 !/outputs/models/*.md
+api/documents
 
 # Mac OS-specific storage files
 .DS_Store
