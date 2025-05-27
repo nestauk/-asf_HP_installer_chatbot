@@ -1,5 +1,4 @@
 from fastapi import FastAPI, BackgroundTasks
-from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 
