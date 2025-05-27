@@ -6,10 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from langserve import add_routes
 from langchain_core.runnables import RunnableConfig
 
+from app.utils.callbacks import langfuse_handler
 from app.utils.events import lifespan
 from rag.chains import rag_chain_with_source
-from rag.utils.callbacks import langfuse_handler_from_config, init_ragas_metrics
-
 
 from datasets import Dataset
 from ragas import evaluate
@@ -44,16 +43,6 @@ app.add_middleware(
     allow_methods=["POST"],  # TODO: change to ["POST", "GET"] when ready
     allow_headers=["*"],
 )
-
-langfuse_handler = langfuse_handler_from_config(
-    trace_name="hp_installer_chatbot_chain",
-    user_id="testing",  # TODO: change to UUID
-    session_id="local",  # TODO: change to UUID + Date
-    version="0.1.0",  # TODO Customise these/ move to .env
-    release="0.1.0",  # TODO Customise these/ move to .env
-    tags=["dev", "api", "v1"],  # TODO Customise these/ move to .env
-)
-
 
 with rag_chain_with_source() as chatbot_chain:
     add_routes(
