@@ -15,24 +15,24 @@ chatbot = "rag.cli:cli"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
-uvicorn = {extras = ["standard"], version = "^0.23.2"}
-langserve = {extras = ["server"], version = ">=0.0.30"}
-pydantic = ">=2"
-unstructured = {extras = ["pdf"], version = ">=0.15.9"}
-nltk = "3.8.1"
-langchain = ">=0.2.2"
-langchain-text-splitters = ">=0.2.4"
-langchain-anthropic = ">=0.1.23"
-langchain-openai = ">=0.1.23"
-langchain-community = ">=0.2.16"
-langchain-core = ">=0.2.38"
-qdrant-client = ">=1.11.1"
-langfuse = ">=2.46.0"
-ragas = "==0.1.16"
-torch = {url = "https://download.pytorch.org/whl/cpu/torch-2.3.1%2Bcpu-cp310-cp310-linux_x86_64.whl"}
-torchvision = {url = "https://download.pytorch.org/whl/cpu/torchvision-0.18.1%2Bcpu-cp310-cp310-linux_x86_64.whl"}
-transformers = "4.41.2"
-
+uvicorn = {extras = ["standard"], version = "0.23.2"}
+langserve = {extras = ["server"], version = "0.3.1"}
+pydantic = "2.9.2"
+unstructured = {extras = ["pdf"], version = "0.17.2"}
+nltk = "3.9.1"
+langchain = "0.3.25"
+langchain-text-splitters = "0.3.8"
+langchain-anthropic = "0.3.13"
+langchain-openai = "0.3.18"
+langchain-community = "0.3.24"
+langchain-core = "0.3.61"
+qdrant-client = "1.14.2"
+langfuse = "2.60.5"
+ragas = "0.1.16"
+torch = {url = "https://download.pytorch.org/whl/cpu/torch-2.7.0%2Bcpu-cp310-cp310-manylinux_2_28_x86_64.whl#sha256=c98c4f48f42a2237e079f3de48e8549de2c8cf68cdcf2041564c7794bbce0b59"}
+torchvision = {url = "https://download.pytorch.org/whl/cpu/torchvision-0.22.0%2Bcpu-cp310-cp310-manylinux_2_28_x86_64.whl#sha256=b1070b55bed045e0f41afe8d6617fc1b6d47088aa3b3430d87f8fcac48f43386"}
+transformers = "4.52.3"
+numpy = "<2"
 
 [tool.poetry.group.dev]
 optional = true
