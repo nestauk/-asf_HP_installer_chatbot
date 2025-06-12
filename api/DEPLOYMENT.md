@@ -175,9 +175,13 @@ Ensure that the instance has the necessary IAM role with permissions to access E
 
 ### 3.4. Pull the Docker Image from ECR
 
-Now that Docker and Docker Compose are installed, you can pull the Docker image from ECR:
+Now that Docker, Docker Compose, and AWS CLI are installed and the necessary IAM role with permissions to access ECR is assigned, you can pull the Docker image from ECR:
 
 ```bash
+# First, within your EC2 instance, authenticate Docker for access to your ECR registry
+aws ecr get-login-password --region eu-west-2 | docker login --username AWS --password-stdin <YOUR-AWS-ACCOUNT-NUMBER>.dkr.ecr.eu-west-2.amazonaws.com
+
+# Then pull the Docker image
 docker pull <YOUR-AWS-ACCOUNT-NUMBER>.dkr.ecr.eu-west-2.amazonaws.com/asf-hpi-chatbot:api-latest-${STAGE}
 ```
 
