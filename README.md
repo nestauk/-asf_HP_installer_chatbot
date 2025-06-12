@@ -8,6 +8,15 @@ This repository contains the **Heat Pump Installer Chatbot**, a prototype chatbo
 - **Installer-Focused**: Designed with the needs of heat pump installers in mind, offering targeted insights and troubleshooting support.
 - **Frontend Integration**: Seamless integration with front ends, such as our Streamlit implementation [here](https://github.com/nestauk/hpi_chatbot_frontend). Also possible to connect to WhatsApp via a Twilio webhook.
 
+## API Documentation
+
+Documentation Markdown files for building and deploying the chatbot backend API can be found in the `/api` directory.
+
+The API project is managed using `Poetry` and uses LangChain/ LangServe ecosystem.
+
+- [API Project README](./api/README.md): Overview of the API project, installation, and running instructions.
+- [Deployment README](./api/DEPLOYMENT.md): Instructions for deploying the API using Docker in local and AWS EC2 environments.
+
 ## Prerequisites
 
 Before setting up the project, ensure you have the following installed:
@@ -18,7 +27,7 @@ Before setting up the project, ensure you have the following installed:
 
 ## Installation & Deployment
 
-For detailed instructions on getting the app up and running, see the [README](api/README.md) in the `api` directory
+For detailed instructions on getting the app up and running, see the [README](./api/README.md) and [Deployment](./api/DEPLOYMENT.md) documentation in the `api` directory.
 
 ## Project Structure
 
