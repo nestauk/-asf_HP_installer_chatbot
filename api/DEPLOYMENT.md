@@ -33,11 +33,12 @@ This document outlines the steps to deploy the Installer Chatbot API on an AWS E
   - [3.4. Pull the Docker Image from ECR](#34-pull-the-docker-image-from-ecr)
   - [3.5. Copy the Docker Compose File into the EC2 Instance](#35-copy-the-docker-compose-file-into-the-ec2-instance)
   - [3.6. Create the Documents Directory](#36-create-the-documents-directory)
-  - [3.7 Create a TMUX session to run the API in the background](#37-create-a-tmux-session-to-run-the-api-in-the-background)
-  - [3.8.(Optional) Setup Reverse Proxy with Caddy](#38optional-setup-reverse-proxy-with-caddy)
-  - [3.9. Route53 Configuration (Optional)](#39-route53-configuration-optional)
-  - [3.10. Access the API](#310-access-the-api)
-  - [3.11. Firewall Configuration](#311-firewall-configuration)
+  - [3.7. Create a TMUX session to run the API in the background](#37-create-a-tmux-session-to-run-the-api-in-the-background)
+  - [3.8. Run the Docker Compose Command](#38-run-the-docker-compose-command)
+  - [3.9. Setup Reverse Proxy with Caddy (Optional)](#39-setup-reverse-proxy-with-caddy-optional)
+  - [3.10. Route53 Configuration (Optional)](#310-route53-configuration-optional)
+  - [3.11. Access the API](#311-access-the-api)
+  - [3.12. Firewall Configuration](#312-firewall-configuration)
 - [4. Document Ingestion](#4-document-ingestion)
   - [4.1.1. Notes on Document Ingestion](#411-notes-on-document-ingestion)
   - [4.1.2. Explore document collections in the Qdrant dashboard](#412-explore-document-collections-in-the-qdrant-dashboard)
@@ -201,7 +202,7 @@ Create a directory on the EC2 instance to hold the documents that the API will u
 mkdir -p ./pdf
 ```
 
-### 3.7 Create a TMUX session to run the API in the background
+### 3.7. Create a TMUX session to run the API in the background
 
 You can use `tmux` to run the API in the background. If `tmux` is not installed, you can install it using:
 
@@ -217,7 +218,7 @@ tmux new -s app
 
 Once inside the `tmux` session, you can run the Docker Compose command to start the API. This allows you to detach from the session and keep the API running in the background.
 
-### 3.7. Run the Docker Compose Command
+### 3.8. Run the Docker Compose Command
 
 SSH into your EC2 instance:
 
@@ -236,7 +237,7 @@ The API will be accessible on port 8000 of your EC2 instance.
 
 You can exit the `tmux` session by pressing `Ctrl + b`, then `d`. This will keep the API running in a background terminal session.
 
-### 3.8.(Optional) Setup Reverse Proxy with Caddy
+### 3.9. Setup Reverse Proxy with Caddy (Optional)
 
 If you want to serve the API over HTTP/HTTPS, you can set up a reverse proxy using Caddy. Caddy is a web server that automatically obtains and renews SSL certificates.
 To install Caddy, follow these steps:
@@ -293,7 +294,7 @@ You may need to restart the Caddy service after making changes to the `Caddyfile
 sudo caddy stop && sudo caddy start
 ```
 
-### 3.9. Route53 Configuration (Optional)
+### 3.10. Route53 Configuration (Optional)
 
 If you want to use a custom domain name for your API, you can set up a Route53 hosted zone and create an A record that points to your EC2 instance's public IP address.
 
@@ -304,13 +305,13 @@ If you want to use a custom domain name for your API, you can set up a Route53 h
 
 For more information on how to set up Route53, refer to the [AWS Route53 documentation](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html).
 
-### 3.10. Access the API
+### 3.11. Access the API
 
 You can now access the API at `http://<YOUR_EC2_PUBLIC_IP>:8000` or `https://your-domain.com` if you set up the reverse proxy with Caddy.
 
 You should be redirected to the API Swagger documentation page, where you can test interactions with the API endpoints.
 
-### 3.11. Firewall Configuration
+### 3.12. Firewall Configuration
 
 If you have a firewall enabled on your EC2 instance, make sure to allow inbound traffic on ports:
 
