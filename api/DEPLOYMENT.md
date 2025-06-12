@@ -317,8 +317,12 @@ If you have a firewall enabled on your EC2 instance, make sure to allow inbound 
 
 - `:22` for SSH connections using a key pair file
 - `:8000` (or the port you configured for the API)
+- `:6333` for Qdrant HTTP endpoints and dashboard
+- `:6334` for Qdrant gRPC endpoints
 - `:80` for HTTP
 - `:443` for HTTPS
+
+You may want to restrict access to these ports to specific IP addresses or ranges for security reasons.
 
 This can be adjusted through the EC2 security group settings in the AWS Management Console.
 
