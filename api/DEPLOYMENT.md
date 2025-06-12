@@ -35,8 +35,9 @@ This document outlines the steps to deploy the Installer Chatbot API on an AWS E
   - [3.6. Create the Documents Directory](#36-create-the-documents-directory)
   - [3.7 Create a TMUX session to run the API in the background](#37-create-a-tmux-session-to-run-the-api-in-the-background)
   - [3.8.(Optional) Setup Reverse Proxy with Caddy](#38optional-setup-reverse-proxy-with-caddy)
-  - [3.9. Access the API](#39-access-the-api)
-  - [3.10. Firewall Configuration](#310-firewall-configuration)
+  - [3.9. Route53 Configuration (Optional)](#39-route53-configuration-optional)
+  - [3.10. Access the API](#310-access-the-api)
+  - [3.11. Firewall Configuration](#311-firewall-configuration)
 - [4. Document Ingestion](#4-document-ingestion)
   - [4.1.1. Notes on Document Ingestion](#411-notes-on-document-ingestion)
   - [4.1.2. Explore document collections in the Qdrant dashboard](#412-explore-document-collections-in-the-qdrant-dashboard)
@@ -253,11 +254,11 @@ Edit the `Caddyfile` to include the following configuration:
 # Caddyfile
 your-domain.com {
     reverse_proxy localhost:8000 {
-            header_up Host {http.reverse_proxy.upstream.hostport}
-            header_up X-Real-IP {http.reverse_proxy.upstream.remote_addr}
-            header_up X-Forwarded-For {http.reverse_proxy.upstream.remote_addr}
-            header_up X-Forwarded-Port {http.reverse_proxy.upstream.remote_port}
-            header_up X-Forwarded-Proto {http.reverse_proxy.upstream.scheme}
+        header_up Host {http.reverse_proxy.upstream.hostport}
+        header_up X-Real-IP {http.reverse_proxy.upstream.remote_addr}
+        header_up X-Forwarded-For {http.reverse_proxy.upstream.remote_addr}
+        header_up X-Forwarded-Port {http.reverse_proxy.upstream.remote_port}
+        header_up X-Forwarded-Proto {http.reverse_proxy.upstream.scheme}
     }
 }
 ```
@@ -288,13 +289,24 @@ You may need to restart the Caddy service after making changes to the `Caddyfile
 sudo caddy stop && sudo caddy start
 ```
 
-### 3.9. Access the API
+### 3.9. Route53 Configuration (Optional)
+
+If you want to use a custom domain name for your API, you can set up a Route53 hosted zone and create an A record that points to your EC2 instance's public IP address.
+
+1. Go to the AWS Management Console and navigate to Route53.
+2. Create a new hosted zone for your domain name.
+3. Create an A record that points to your EC2 instance's public IP address.
+4. If you are using Caddy as a reverse proxy, ensure that the domain name in the `Caddyfile` (previous section) matches the A record you created in Route53.
+
+For more information on how to set up Route53, refer to the [AWS Route53 documentation](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html).
+
+### 3.10. Access the API
 
 You can now access the API at `http://<YOUR_EC2_PUBLIC_IP>:8000` or `https://your-domain.com` if you set up the reverse proxy with Caddy.
 
 You should be redirected to the API Swagger documentation page, where you can test interactions with the API endpoints.
 
-### 3.10. Firewall Configuration
+### 3.11. Firewall Configuration
 
 If you have a firewall enabled on your EC2 instance, make sure to allow inbound traffic on ports:
 
@@ -356,6 +368,7 @@ Some things you can do in the Qdrant dashboard:
 - [Qdrant Documentation](https://qdrant.tech/documentation/)
 - [AWS CLI Documentation](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-welcome.html)
 - [AWS IAM Documentation](https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html)
+- [AWS Route53 Documentation](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html)
 
 ## 6. Troubleshooting
 
