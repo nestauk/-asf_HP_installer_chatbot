@@ -240,6 +240,15 @@ You can exit the `tmux` session by pressing `Ctrl + b`, then `d`. This will keep
 ### 3.9. Setup Reverse Proxy with Caddy (Optional)
 
 If you want to serve the API over HTTP/HTTPS, you can set up a reverse proxy using Caddy. Caddy is a web server that automatically obtains and renews SSL certificates.
+
+This step is essential for production if:
+
+- You want HTTPS
+- You have a custom domain
+- You want a clean, secure, public-facing API
+
+The choice of reverse proxy is up to you, but Caddy is recommended for its simplicity and automatic SSL certificate management.
+
 To install Caddy, follow these steps:
 
 ```bash
