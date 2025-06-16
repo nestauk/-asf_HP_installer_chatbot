@@ -121,7 +121,16 @@ docker push <YOUR-AWS-ACCOUNT-NUMBER>.dkr.ecr.eu-west-2.amazonaws.com/asf-hpi-ch
 ### 3.2. Install Docker and Docker Compose
 
 The following is adapted from the [official Docker documentation](https://docs.docker.com/engine/install/ubuntu/) for installing Docker and Docker Compose on Ubuntu.
-SSH into your EC2 instance using the key pair you created during the instance launch:
+
+First, SSH into your EC2 instance using the key pair you created during the instance launch:
+
+```bash
+ssh -L 6333:127.0.0.1:6333 -L 6334:127.0.0.1:6334 -i path_to/asf-hpi-chatbot.pem ubuntu@ec2-XX-XXX-XX-XX.compute.amazonaws.com
+```
+
+> NOTE: XX-XXX-XX-XX is the public IP of the EC2 instance.
+
+Next, run the following commands to install Docker and Docker Compose:
 
 ```bash
 # Update the package index
