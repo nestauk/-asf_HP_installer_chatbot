@@ -399,7 +399,7 @@ This document provides a comprehensive guide to deploying the Installer Chatbot 
 
 ## 8. License
 
-This document and repository is licensed under the MIT License. You can find the full text of the license in the [LICENSE](../LICENSE) file in the root directory of this repository.
+This repository is licensed under the AGPL-3.0 license. You can find the full text of the license in the [LICENSE](../LICENSE) file in the root directory of this repository.
 
 ## 9. Additional Notes
 
