@@ -28,6 +28,73 @@ This document outlines the steps to deploy the Installer Chatbot API on an AWS E
 - [2. Push the Docker Image to ECR](#2-push-the-docker-image-to-ecr)
 - [3. Deploy on AWS EC2 Instance](#3-deploy-on-aws-ec2-instance)
   - [3.1. Launch an EC2 Instance](#31-launch-an-ec2-instance)
+
+## Environment Variables: DOCKER_REGISTRY, STAGE, DOCUMENTS_PATH
+
+The deployment process relies on several key environment variables, which must be set for both local and cloud deployments. These variables are referenced in the Docker Compose configuration and should be defined in your environment or in a `.env` file (see `.env.template`).
+
+| Variable            | Example Value                                               | Description                                                                                              |
+| ------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| OPENAI_API_KEY      | `sk-...`                                                    | Your OpenAI API key. Required for any features that use OpenAI models (e.g., GPT-3/4).                   |
+| LANGFUSE_PUBLIC_KEY | `pk-...`                                                    | Public key for Langfuse analytics/monitoring (if enabled).                                               |
+| LANGFUSE_SECRET_KEY | `sk-...`                                                    | Secret key for Langfuse analytics/monitoring (if enabled).                                               |
+| LANGFUSE_HOST       | `https://app.langfuse.com`                                  | Host URL for Langfuse. Set if using Langfuse for tracing/analytics.                                      |
+| QDRANT_URL          | `http://qdrant-vdb:6334`                                    | URL for the Qdrant vector database instance. Used for document storage and retrieval.                    |
+| DOCKER_REGISTRY     | `<YOUR-AWS-ACCOUNT-NUMBER>.dkr.ecr.eu-west-2.amazonaws.com` | The URL of your AWS ECR Docker registry.                                                                 |
+| STAGE               | `prod`                                                      | The deployment stage (e.g., `prod`, `dev`, etc.). Used for image tagging and config.                     |
+| DOCUMENTS_PATH      | `./pdf/` (cloud), `../inputs/data/` (local)                 | Path to the directory containing PDF documents to be ingested. Mounted as `/documents` in the container. |
+
+**Variable Explanations:**
+
+- **OPENAI_API_KEY**: Set this to your OpenAI API key if you want to use any OpenAI-powered features (e.g., GPT-3/4 completions, embeddings, etc.).
+- **LANGFUSE_PUBLIC_KEY** and **LANGFUSE_SECRET_KEY**: If you use [Langfuse](https://langfuse.com/) for analytics, tracing, or monitoring, set these to your Langfuse project keys. If not using Langfuse, you can leave these blank.
+- **LANGFUSE_HOST**: The base URL for your Langfuse instance. Only needed if using Langfuse.
+- **QDRANT_URL**: The URL for your Qdrant vector database. This is used for storing and retrieving document embeddings. The default assumes a Docker Compose service named `qdrant-vdb` running on port 6334.
+- **DOCKER_REGISTRY**: The URL of your Docker registry (e.g., AWS ECR). Used to pull/push images. Replace the placeholder with your actual registry URL.
+- **STAGE**: The deployment stage (e.g., `prod`, `dev`). Used for image tags and environment-specific config.
+- **DOCUMENTS_PATH**: Path to your PDF documents directory. This is mounted read-only into the container at `/documents`. For local dev, this might be `../inputs/data/`; for cloud/EC2, typically `./pdf/`.
+
+**How to set these variables:**
+
+- You can export them in your shell before running Docker Compose:
+  ```bash
+  export OPENAI_API_KEY=sk-...
+  export LANGFUSE_PUBLIC_KEY=pk-...
+  export LANGFUSE_SECRET_KEY=sk-...
+  export LANGFUSE_HOST=https://app.langfuse.com
+  export QDRANT_URL=http://qdrant-vdb:6334
+  export DOCKER_REGISTRY=<YOUR-AWS-ACCOUNT-NUMBER>.dkr.ecr.eu-west-2.amazonaws.com
+  export STAGE=prod
+  export DOCUMENTS_PATH=./pdf/
+  docker compose -f docker-compose.yml up
+  ```
+- Or, use them inline with the command:
+  ```bash
+  OPENAI_API_KEY=sk-... LANGFUSE_PUBLIC_KEY=pk-... LANGFUSE_SECRET_KEY=sk-... LANGFUSE_HOST=https://app.langfuse.com QDRANT_URL=http://qdrant-vdb:6334 DOCKER_REGISTRY=<YOUR-AWS-ACCOUNT-NUMBER>.dkr.ecr.eu-west-2.amazonaws.com STAGE=prod DOCUMENTS_PATH=./pdf/ docker compose -f docker-compose.yml up
+  ```
+- Or, copy `.env.template` to `.env` and fill in the values. Docker Compose will automatically load them.
+
+**Where these are used:**
+
+- `DOCKER_REGISTRY` and `STAGE` are used to construct the image name in `docker-compose.yml`:
+  ```yaml
+  image: ${DOCKER_REGISTRY}/asf-hpi-chatbot:api-latest-${STAGE}
+  ```
+- `DOCUMENTS_PATH` is used to mount your documents directory into the container:
+  ```yaml
+  volumes:
+    - ${DOCUMENTS_PATH}:/documents:ro
+  ```
+- `QDRANT_URL`, `OPENAI_API_KEY`, and Langfuse variables are typically referenced in the app's configuration or as environment variables in the Docker Compose service definition.
+
+See the `.env.template` file for a full list of required environment variables and example values.
+
+---
+
+- [1. Local Deployment](#1-local-deployment)
+- [2. Push the Docker Image to ECR](#2-push-the-docker-image-to-ecr)
+- [3. Deploy on AWS EC2 Instance](#3-deploy-on-aws-ec2-instance)
+  - [3.1. Launch an EC2 Instance](#31-launch-an-ec2-instance)
   - [3.2. Install Docker and Docker Compose](#32-install-docker-and-docker-compose)
   - [3.3. Install AWS](#33-install-aws)
   - [3.4. Pull the Docker Image from ECR](#34-pull-the-docker-image-from-ecr)
@@ -50,6 +117,48 @@ This document outlines the steps to deploy the Installer Chatbot API on an AWS E
 
 ## 1. Local Deployment
 
+### 1.0. Environment Variables: `DOCKER_REGISTRY`, `STAGE`, and `DOCUMENTS_PATH`
+
+This project uses three key environment variables for deployment and Docker Compose configuration. These must be set for both local and cloud deployments. You can set them directly in your shell, or by copying `.env.template` to `.env` and editing the values.
+
+**Environment Variable Reference:**
+
+| Variable        | Example Value                                               | Description                                                                                        |
+| --------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| DOCKER_REGISTRY | `<YOUR-AWS-ACCOUNT-NUMBER>.dkr.ecr.eu-west-2.amazonaws.com` | The URL of your Docker registry (e.g., AWS ECR). Used to pull/push images.                         |
+| STAGE           | `prod` (or `dev`, `staging`, etc.)                          | The deployment stage. Used for image tags and environment-specific config.                         |
+| DOCUMENTS_PATH  | `./pdf/` or `../inputs/data/`                               | Path to the directory containing PDF documents to be ingested. Mounted read-only in the container. |
+
+**How to set these variables:**
+
+1. **Edit `.env.template`**: Copy `.env.template` to `.env` and fill in the values for your environment. Example:
+   ```bash
+   cp .env.template .env
+   # Edit .env with your values
+   ```
+2. **Or set them inline when running Docker Compose:**
+   ```bash
+   DOCKER_REGISTRY=<YOUR-AWS-ACCOUNT-NUMBER>.dkr.ecr.eu-west-2.amazonaws.com STAGE=prod DOCUMENTS_PATH=../inputs/data/ docker compose -f docker-compose.yml up --build
+   ```
+
+**Where are these used?**
+
+- In `docker-compose.yml`:
+  - `image: ${DOCKER_REGISTRY}/asf-hpi-chatbot:api-latest-${STAGE}`
+  - `volumes: - ${DOCUMENTS_PATH}:/documents:ro`
+
+**Details:**
+
+- `DOCKER_REGISTRY` is required to pull/push images from your private registry (e.g., AWS ECR). Replace the placeholder with your actual registry URL.
+- `STAGE` allows you to tag images and configure deployments for different environments (e.g., `prod`, `dev`).
+- `DOCUMENTS_PATH` should point to the directory containing your PDF files. This path is mounted read-only into the container at `/documents`.
+  - For local dev, this might be `../inputs/data/` or any folder with your PDFs.
+  - For cloud/EC2, this is typically `./pdf/` in the same directory as your `docker-compose.yml`.
+
+**See also:** `.env.template` for example values and required variables.
+
+---
+
 As a first step, the Chatbot API image needs to be built. The following command can also be used in the [cloud deployment steps](#3-deploy-on-aws-ec2-instance) below to Deploy the API on an EC2 instance.
 
 ```bash
@@ -57,28 +166,9 @@ As a first step, the Chatbot API image needs to be built. The following command 
 DOCKER_REGISTRY=<YOUR-AWS-ACCOUNT-NUMBER>.dkr.ecr.eu-west-2.amazonaws.com STAGE=prod DOCUMENTS_PATH=../inputs/data/ docker compose -f docker-compose.yml up --build
 ```
 
-This command builds the Docker image and starts the container. Make sure to replace `<YOUR-AWS-ACCOUNT-NUMBER>.dkr.ecr.eu-west-2.amazonaws.com` with your actual ECR repository URL.
+This command builds the Docker image and starts the container. Make sure to replace `<YOUR-AWS-ACCOUNT-NUMBER>.dkr.ecr.eu-west-2.amazonaws.com` with your actual ECR repository URL. You can also set these variables in a `.env` file instead of inline.
 
-From the above command, there are some environment variables that you can see is used in Line 33 and Line 45-46 of `docker-compose.yml`,
-
-```yaml
-# Line 33
-image: ${DOCKER_REGISTRY}/asf-hpi-chatbot:api-latest-${STAGE}
-```
-
-```yaml
-# Lines 45-46
-volumes:
-  - ${DOCUMENTS_PATH}:/documents:ro
-```
-
-Where:
-
-- `DOCKER_REGISTRY` is the URL of your ECR registry.
-- `STAGE` is the deployment stage, e.g., `prod`, `dev`, etc.
-- `DOCUMENTS_PATH` is the path to the documents directory that contains the data files (.pdf files) for the API. This is relative to the `/api` directory where the `docker-compose.yml` file is located. You can set this to the path where your documents are stored locally, such as `../inputs/data/`.
-
-These can be modified to fit your requirements. The image naming is a convention and is trivial to change.
+These variables can be modified to fit your requirements. The image naming is a convention and is trivial to change.
 
 ### 1.1. Access the API Locally
 
