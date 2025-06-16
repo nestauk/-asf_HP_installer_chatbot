@@ -2,7 +2,6 @@ from langchain_core.vectorstores import VectorStoreRetriever, VectorStore
 
 from contextlib import contextmanager
 
-from functools import partial
 from typing import Generator, Any
 
 from rag.vector_databases import init_vdb

@@ -1,6 +1,5 @@
 from typing import Generator, Any
 from contextlib import contextmanager
-from functools import partialmethod
 
 from rag.vector_databases.retrievers import init_chatbot_retriever
 from rag.prompt_templates import chatbot_template, chatbot_with_history_template

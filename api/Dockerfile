@@ -6,11 +6,16 @@
 
 # Want to help us make this template better? Share your feedback here: https://forms.gle/ybq9Krt8jtBL3iCk7
 
-ARG PYTHON_VERSION=3.10.14
+ARG PYTHON_VERSION=3.10.17
 FROM python:${PYTHON_VERSION}-slim AS base
 RUN apt-get update && apt-get install -y \
     build-essential \
     git
+
+# additional dependencies for the application
+RUN apt-get install -y \
+    poppler-utils \
+    tesseract-ocr
 
 # Prevents Python from writing pyc files.
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -31,13 +36,19 @@ COPY ./api/app/ ./app
 RUN python -m pip install --no-cache-dir .
 RUN python -m pip uninstall -y opencv-python opencv-contrib-python && python -m pip install --no-cache-dir opencv-python-headless==4.10.0.82
 
+# NLTK data things
+RUN python -m nltk.downloader punkt -d /usr/local/share/nltk_data
+RUN python -m nltk.downloader punkt_tab -d /usr/local/share/nltk_data
+RUN python -m nltk.downloader averaged_perceptron_tagger -d /usr/local/share/nltk_data
+RUN python -m nltk.downloader averaged_perceptron_tagger_eng -d /usr/local/share/nltk_data
+
 # Create a non-privileged user that the app will run under.
 # See https://docs.docker.com/go/dockerfile-user-best-practices/
 ARG UID=10001
 RUN adduser \
     --disabled-password \
     --gecos "" \
-    --home "/nonexistent" \
+    --home "/code" \
     --shell "/sbin/nologin" \
     --no-create-home \
     --uid "${UID}" \
